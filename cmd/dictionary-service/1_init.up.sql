@@ -23,10 +23,8 @@ create table child
 			on delete cascade
 );
 
-create view all_dictionaries as
-    select key, type, group_id, tenant, content
-        from dictionary
-    union
-    select child.key, child.type, d.group_id, child.tenant, child.content
-        from child join dictionary d on child.parent_key = d.key and child.type = d.type and child.tenant = d.tenant;
-
+create or replace view all_dictionaries as select key, type, group_id, tenant, content, true as "parent", null as "parent_key"
+from dictionary
+union
+select child.key, child.type, d.group_id, child.tenant, child.content, false, d.key as "parent_key"
+from child join dictionary d on child.parent_key = d.key and child.type = d.type and child.tenant = d.tenant;

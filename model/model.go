@@ -61,24 +61,26 @@ var Tables = struct {
 
 //noinspection ALL
 type Child struct {
-	tableName struct{} `sql:"child,alias:t" pg:",discard_unknown_columns"`
+	tableName struct{} `pg:"child,alias:ch" pg:",discard_unknown_columns"`
 
-	Key       string                 `sql:"key,pk"`
-	Type      string                 `sql:"type,pk"`
-	Tenant    string                 `sql:"tenant,pk"`
-	ParentKey string                 `sql:"parent_key,notnull"`
-	Content   map[string]interface{} `sql:"content"`
+	Key       string                 `pg:"key,pk"`
+	Type      string                 `pg:"type,pk"`
+	Tenant    string                 `pg:"tenant,pk"`
+	ParentKey string                 `pg:"parent_key,notnull"`
+	Content   map[string]interface{} `pg:"content"`
 
-	Parent *Dictionary `pg:"fk:parent_key,type,tenant" sql:"-"` // unsupported
+	//Parent *Dictionary `pg:"fk:parent_key,type,tenant" pg:"-"` // unsupported
 }
 
 //noinspection ALL
 type Dictionary struct {
-	tableName struct{} `sql:"dictionary,alias:t" pg:",discard_unknown_columns"`
+	tableName struct{} `pg:"dictionary,alias:p" pg:",discard_unknown_columns"`
 
-	Key     string                 `sql:"key,pk"`
-	Type    string                 `sql:"type,pk"`
-	GroupID *string                `sql:"group_id"`
-	Tenant  string                 `sql:"tenant,pk"`
-	Content map[string]interface{} `sql:"content"`
+	Key       string                 `pg:"key,pk"`
+	Type      string                 `pg:"type,pk"`
+	GroupID   *string                `pg:"group_id"`
+	Tenant    string                 `pg:"tenant,pk"`
+	Content   map[string]interface{} `pg:"content"`
+	Parent    bool                   `pg:"parent"`
+	ParentKey *string                `pg:"parent_key"`
 }

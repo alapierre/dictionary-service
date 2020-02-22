@@ -1,7 +1,9 @@
 package main
 
 import (
+	"dictionaries-service/service"
 	"dictionaries-service/util"
+	"fmt"
 	slog "github.com/go-eden/slf4go"
 	"github.com/go-pg/pg/v9"
 	"github.com/kelseyhightower/envconfig"
@@ -29,6 +31,15 @@ func main() {
 
 	db := connectDb()
 	defer util.Close(db)
+
+	repository := service.NewDictionaryRepository(db)
+	dicts, err := repository.LoadAll("")
+
+	util.FailOnError(err, "Can't query")
+
+	for _, d := range dicts {
+		fmt.Printf("%#v\n", d)
+	}
 
 }
 
