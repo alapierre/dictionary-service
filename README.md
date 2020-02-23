@@ -34,3 +34,28 @@ Do not forget to set envirnoment variables.
 
 `GET /api/dictionary/{type}/{key}`
 
+```
+{
+"children": [
+ {
+   "key": "uw1",
+   "label": "ala",
+   "name": "urlop 1",
+   "type": "AbsenceType"
+ },
+ {
+   "key": "uw2",
+   "label": "ola",
+   "name": "urlop 2",
+   "type": "AbsenceType"
+ }
+],
+"key": "uw",
+"name": "Urlop wypoczynkowy",
+"needConfirmationDocumentNumber": false,
+"needDeliveryDateConfirmation": true,
+"onlyOnBeginOrEnd": true,
+"tenant": "",
+"type": "AbsenceType"
+}
+```
