@@ -1,0 +1,20 @@
+version: '3.1'
+services:
+
+  db:
+    image: postgres:12
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=qwedsazxc
+      - POSTGRES_USER=app
+    ports:
+      - "5432:5432"
+
+  eureka:
+    image: dc.sidgroup.pl/s4t-eureka:1.0.8
+    ports:
+      - "8761:8761"
+
+volumes:
+  pg_data:
