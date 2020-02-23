@@ -14,9 +14,20 @@ Almost any system needs to store and manage flexible dictionary values. Some of 
 - integrate with Netflix Eureka and oAtuh
 - no additional, other than PostgreSQ database for store dictionarys and configuration data - in cloud operators it is additional cost
 
+## Reqired envirnoment variables
+
+- DICT_DATASOURCE_USER
+- DICT_DATASOURCE_PASSWORD
+
+...and more can be found in main.go
+
+Default service connects to database on localhost:5432
+
 ## How it works
 
 You need put somethind into database first. Try SQL from testdata.
+Do not forget to set envirnoment variables.
+
 
 ### Loading stored dictionary 
 
