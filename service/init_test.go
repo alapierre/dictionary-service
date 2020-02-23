@@ -24,7 +24,6 @@ func TestMain(m *testing.M) {
 	dictRepository = NewDictionaryRepository(db)
 	chRepository = NewChildRepository(db)
 	service = NewDictionaryService(dictRepository, chRepository)
-	dictRepository = NewDictionaryRepository(db)
 
 	ex := m.Run()
 

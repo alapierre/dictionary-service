@@ -49,8 +49,16 @@ func prepareMap(dict *model.Dictionary) map[string]interface{} {
 	res["key"] = dict.Key
 	res["type"] = dict.Type
 	res["tenant"] = dict.Tenant
-	res["group_id"] = dict.GroupID
-	res["parent_key"] = dict.ParentKey
+	res["name"] = dict.Name
+
+	if dict.GroupID != nil {
+		res["group_id"] = dict.GroupID
+	}
+
+	if dict.ParentKey != nil {
+		res["parent_key"] = *dict.ParentKey
+	}
+
 	mergeMaps(&dict.Content, &res)
 
 	return res
@@ -64,7 +72,8 @@ func prepareChildrenMap(children []model.Child) []childrenMap {
 		tmp := make(map[string]interface{})
 		tmp["type"] = ch.Type
 		tmp["key"] = ch.Key
-		tmp["tenant"] = ch.Tenant
+		tmp["name"] = ch.Name
+		//tmp["tenant"] = ch.Tenant
 
 		mergeMaps(&ch.Content, &tmp)
 		list[i] = tmp

@@ -65,6 +65,7 @@ type Child struct {
 
 	Key       string                 `pg:"key,pk"`
 	Type      string                 `pg:"type,pk"`
+	Name      string                 `pg:"name"`
 	Tenant    string                 `pg:"tenant,pk"`
 	ParentKey string                 `pg:"parent_key,notnull"`
 	Content   map[string]interface{} `pg:"content"`
@@ -78,6 +79,7 @@ type Dictionary struct {
 
 	Key       string                 `pg:"key,pk"`
 	Type      string                 `pg:"type,pk"`
+	Name      string                 `pg:"name"`
 	GroupID   *string                `pg:"group_id"`
 	Tenant    string                 `pg:"tenant,pk"`
 	Content   map[string]interface{} `pg:"content"`
