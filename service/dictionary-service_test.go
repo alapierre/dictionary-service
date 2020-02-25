@@ -6,18 +6,15 @@ import (
 )
 
 func TestDictionaryService_Load(t *testing.T) {
-
-}
-
-func TestDictionaryService_LoadShallow(t *testing.T) {
-
 	dict, err := service.Load("uw", "AbsenceType", "")
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("%v\n", dict)
+}
 
+func TestDictionaryService_LoadShallow(t *testing.T) {
 }
 
 func TestNewDictionaryService(t *testing.T) {

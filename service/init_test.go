@@ -10,7 +10,6 @@ import (
 
 var (
 	db             *pg.DB
-	chRepository   ChildRepository
 	service        *DictionaryService
 	dictRepository DictionaryRepository
 )
@@ -22,8 +21,7 @@ func TestMain(m *testing.M) {
 	db = connectTestDb()
 
 	dictRepository = NewDictionaryRepository(db)
-	chRepository = NewChildRepository(db)
-	service = NewDictionaryService(dictRepository, chRepository)
+	service = NewDictionaryService(dictRepository)
 
 	ex := m.Run()
 

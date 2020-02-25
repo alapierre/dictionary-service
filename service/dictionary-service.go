@@ -4,13 +4,12 @@ import (
 	"dictionaries-service/model"
 )
 
-func NewDictionaryService(dictionaryRepository DictionaryRepository, childRepository ChildRepository) *DictionaryService {
-	return &DictionaryService{dictionaryRepository: dictionaryRepository, childRepository: childRepository}
+func NewDictionaryService(dictionaryRepository DictionaryRepository) *DictionaryService {
+	return &DictionaryService{dictionaryRepository: dictionaryRepository}
 }
 
 type DictionaryService struct {
 	dictionaryRepository DictionaryRepository
-	childRepository      ChildRepository
 }
 
 func (s *DictionaryService) LoadShallow(key, dictionaryType, tenant string) (map[string]interface{}, error) {
@@ -29,8 +28,8 @@ func (s *DictionaryService) Load(key, dictionaryType, tenant string) (map[string
 
 	res := prepareMap(dict)
 
-	if dict.Parent {
-		children, err := s.childRepository.LoadChildren(key, dictionaryType, tenant)
+	if dict.ParentKey == nil {
+		children, err := s.dictionaryRepository.LoadChildren(key, dictionaryType, tenant)
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +63,7 @@ func prepareMap(dict *model.Dictionary) map[string]interface{} {
 	return res
 }
 
-func prepareChildrenMap(children []model.Child) []childrenMap {
+func prepareChildrenMap(children []model.Dictionary) []childrenMap {
 
 	list := make([]childrenMap, len(children))
 

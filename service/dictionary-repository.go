@@ -14,6 +14,7 @@ type DictionaryRepository interface {
 	Save(dict *model.Dictionary) error
 	LoadAll(tenant string) ([]model.Dictionary, error)
 	LoadByType(dictionaryType, tenant string) ([]model.Dictionary, error)
+	LoadChildren(parentKey, dictionaryType, tenant string) ([]model.Dictionary, error)
 }
 
 type dictionaryRepository struct {
@@ -31,7 +32,13 @@ func (s *dictionaryRepository) Load(key, dictionaryType, tenant string) (*model.
 }
 
 func (s *dictionaryRepository) Save(dict *model.Dictionary) error {
-	return nil
+	err := s.db.Insert(dict)
+	return err
+}
+
+func (s *dictionaryRepository) Update(dict *model.Dictionary) error {
+	err := s.db.Update(dict)
+	return err
 }
 
 func (s *dictionaryRepository) LoadAll(tenant string) ([]model.Dictionary, error) {
@@ -42,6 +49,14 @@ func (s *dictionaryRepository) LoadAll(tenant string) ([]model.Dictionary, error
 		`select * from all_dictionaries where tenant = ?`, tenant)
 
 	return dicts, err
+}
+
+func (s *dictionaryRepository) LoadChildren(parentKey, dictionaryType, tenant string) ([]model.Dictionary, error) {
+	var children []model.Dictionary
+	_, err := s.db.Query(&children, `select * from dictionary where parent_key = ? and type = ? and tenant = ?`,
+		parentKey, dictionaryType, tenant)
+
+	return children, err
 }
 
 func (s *dictionaryRepository) LoadByType(dictionaryType, tenant string) ([]model.Dictionary, error) {
