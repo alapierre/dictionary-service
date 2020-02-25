@@ -9,3 +9,6 @@ build:
 
 docker: build
 	cd cmd/dictionary-service && docker build -t lapierre/dictionary-service:$(IMAGE_VERSION) .
+
+push:
+	docker push lapierre/dictionary-service:$(IMAGE_VERSION)
