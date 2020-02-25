@@ -44,11 +44,10 @@ func main() {
 	db := connectDb()
 	defer util.Close(db)
 
-	//migrate(db)
+	migrate(db)
 
 	dictRepository := service.NewDictionaryRepository(db)
-	chRepository := service.NewChildRepository(db)
-	service := service.NewDictionaryService(dictRepository, chRepository)
+	service := service.NewDictionaryService(dictRepository)
 
 	r := mux.NewRouter()
 	r.Use(addContext)

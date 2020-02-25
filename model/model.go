@@ -60,20 +60,6 @@ var Tables = struct {
 }
 
 //noinspection ALL
-type Child struct {
-	tableName struct{} `pg:"child,alias:ch" pg:",discard_unknown_columns"`
-
-	Key       string                 `pg:"key,pk"`
-	Type      string                 `pg:"type,pk"`
-	Name      string                 `pg:"name"`
-	Tenant    string                 `pg:"tenant,pk"`
-	ParentKey string                 `pg:"parent_key,notnull"`
-	Content   map[string]interface{} `pg:"content"`
-
-	//Parent *Dictionary `pg:"fk:parent_key,type,tenant" pg:"-"` // unsupported
-}
-
-//noinspection ALL
 type Dictionary struct {
 	tableName struct{} `pg:"dictionary,alias:p" pg:",discard_unknown_columns"`
 

@@ -86,3 +86,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 /dictionaries-service.iml
+/cmd/dictionary-service/dictionary-service
