@@ -46,16 +46,28 @@ func main() {
 
 	migrate(db)
 
-	dictRepository := service.NewDictionaryRepository(db)
-	service := service.NewDictionaryService(dictRepository)
+	dictionaryRepository := service.NewDictionaryRepository(db)
+	dictionaryService := service.NewDictionaryService(dictionaryRepository)
 
 	r := mux.NewRouter()
 	r.Use(addContext)
 
 	r.Methods("GET").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
-		transport.MakeLoadDictEndpoint(service),
-		transport.LoadDictRequest,
+		transport.MakeLoadDictEndpoint(dictionaryService),
+		transport.DecodeLoadDictRequest,
 		transport.EncodeResponse,
+	))
+
+	r.Methods("POST").Path("/api/dictionary").Handler(httptransport.NewServer(
+		transport.MakeSaveDictionaryEndpoint(dictionaryService),
+		transport.DecodeSaveDictRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("PUT").Path("/api/dictionary").Handler(httptransport.NewServer(
+		transport.MakeUpdateDictionaryEndpoint(dictionaryService),
+		transport.DecodeSaveDictRequest,
+		transport.EncodeSavedResponse,
 	))
 
 	http.Handle("/", r)
