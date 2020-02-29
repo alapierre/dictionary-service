@@ -24,9 +24,38 @@ Almost any system needs to store and manage flexible dictionary values. Some of 
 
 Default service connects to database on localhost:5432
 
-## How it works
+##How it works
 
 Do not forget to set environment variables.
+
+### Run with Docker
+
+```yaml
+version: '3.1'
+services:
+
+  db:
+    image: postgres:12
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=qwedsazxc
+      - POSTGRES_USER=app
+    ports:
+      - "5432:5432"
+
+  dict:
+    image: lapierre/dictionary-service:0.0.2
+    environment:
+      - DICT_DATASOURCE_HOST=db:5432
+      - DICT_DATASOURCE_PASSWORD=qwedsazxc
+      - DICT_DATASOURCE_USER=app
+    ports:
+      - "9098:9098"
+
+volumes:
+  pg_data:
+```
 
 ### Save new dictionary entry
 
