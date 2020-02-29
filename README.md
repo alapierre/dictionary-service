@@ -24,9 +24,15 @@ Almost any system needs to store and manage flexible dictionary values. Some of 
 
 Default service connects to database on localhost:5432
 
-##How it works
+## How it works
 
 Do not forget to set environment variables.
+
+### Run in bash
+
+```
+$ make run
+```
 
 ### Run with Docker
 
