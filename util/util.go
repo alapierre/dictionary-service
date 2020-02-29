@@ -1,6 +1,9 @@
 package util
 
-import "github.com/go-eden/slf4go"
+import (
+	"github.com/go-eden/slf4go"
+	"github.com/go-pg/pg/v9"
+)
 
 func FailOnError(err error, msg string) {
 	if err != nil {
@@ -18,4 +21,21 @@ func Close(target Closable) {
 	if err != nil {
 		slog.Errorf("Cant close %v", target)
 	}
+}
+
+type TransactionCallback func() error
+
+func DoInTransaction(db *pg.DB, callback TransactionCallback) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	err = callback()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	return err
 }

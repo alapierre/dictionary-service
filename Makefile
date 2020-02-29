@@ -1,5 +1,5 @@
 CONNECTION_STRING=postgres://app:qwedsazxc@localhost:5432/app?sslmode=disable
-IMAGE_VERSION=0.0.1
+IMAGE_VERSION=0.0.2
 DATASOURCE_USER=app
 DICT_DATASOURCE_PASSWORD=qwedsazxc
 
