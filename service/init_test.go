@@ -23,7 +23,8 @@ func TestMain(m *testing.M) {
 	db = connectTestDb()
 
 	dictRepository = NewDictionaryRepository(db)
-	service = NewDictionaryService(dictRepository)
+	translationRepository := NewTranslateRepository(db)
+	service = NewDictionaryService(dictRepository, translationRepository)
 
 	ex := m.Run()
 
