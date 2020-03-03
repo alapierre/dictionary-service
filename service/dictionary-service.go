@@ -205,6 +205,10 @@ func (s *DictionaryService) LoadByType(dictionaryType string, tenant string) ([]
 	return s.dictionaryRepository.LoadByType(dictionaryType, tenant)
 }
 
+func (s *DictionaryService) AvailableDictionaryTypes(tenant string) ([]string, error) {
+	return s.metadataRepository.AvailableDictionaryTypes(tenant)
+}
+
 type childrenMap map[string]interface{}
 
 func prepareMap(dict *model.Dictionary) map[string]interface{} {

@@ -71,6 +71,14 @@ func main() {
 		transport.EncodeMetadataResponse,
 	))
 
+	r.Methods("GET").Path("/api/metadata").Handler(httptransport.NewServer(
+		transport.MakeAvailableDictionaryTypesEndpoint(dictionaryService),
+		func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
+			return nil, nil
+		},
+		transport.EncodeResponse,
+	))
+
 	r.Methods("GET").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
 		transport.MakeLoadDictionaryByType(dictionaryService),
 		transport.DecodeByTypeRequest,

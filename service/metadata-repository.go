@@ -16,6 +16,7 @@ type DictionaryMetadataRepository interface {
 	Update(translate *model.DictionaryMetadata) error
 	Delete(translation *model.DictionaryMetadata) error
 	Load(dictionaryType, tenant string) (*model.DictionaryMetadata, error)
+	AvailableDictionaryTypes(tenant string) ([]string, error)
 }
 
 type dictionaryMetadataRepository struct {
@@ -49,4 +50,12 @@ func (s *dictionaryMetadataRepository) Update(metadata *model.DictionaryMetadata
 
 func (s *dictionaryMetadataRepository) Delete(metadata *model.DictionaryMetadata) error {
 	return s.db.Delete(metadata)
+}
+
+func (s *dictionaryMetadataRepository) AvailableDictionaryTypes(tenant string) ([]string, error) {
+
+	var types []string
+	_, err := s.db.Query(&types, `select type from dictionary_metadata dictionary where tenant = ?`, tenant)
+
+	return types, err
 }
