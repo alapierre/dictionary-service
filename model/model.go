@@ -26,6 +26,15 @@ type Translation struct {
 	Name     string `pg:"name"`
 }
 
+//noinspection ALL
+type DictionaryMetadata struct {
+	tableName struct{} `pg:"dictionary_metadata,alias:m"`
+
+	Type    string `pg:"type,pk"`
+	Tenant  string `pg:"tenant,pk,use_zero"`
+	Content string `pg:"content"`
+}
+
 // helper indirect model
 
 type ParentDictionary struct {

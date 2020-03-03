@@ -9,6 +9,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/gorilla/mux"
 	"golang.org/x/text/language"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -35,7 +36,11 @@ type saveDictionaryRequest struct {
 	Children []map[string]interface{}
 }
 
-type deleteDictionaryByTypeRequest struct {
+type byTypeRequest struct {
+	Type string
+}
+
+type metadataRequest struct {
 	Type string
 }
 
@@ -48,6 +53,48 @@ type saveShallowDictionaryRequest struct {
 	ParentKey *string                `json:"parent_key"`
 }
 
+func MakeLoadDictShallowEndpoint(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		tenant := extractTenant(ctx)
+		req := request.(dictionaryRequest)
+
+		r, err := service.LoadShallow(req.Key, req.Type, tenant)
+
+		if err != nil {
+			return makeRestError(err, "cant_load_dictionary_by_key_and_type")
+		}
+		return r, nil
+	}
+}
+
+func MakeLoadDictionaryByType(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		tenant := extractTenant(ctx)
+		req := request.(byTypeRequest)
+		res, err := service.LoadByType(req.Type, tenant)
+		return res, err
+	}
+}
+
+func MakeLoadMetadataEndpoint(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		tenant := extractTenant(ctx)
+		req := request.(metadataRequest)
+		res, err := service.LoadMetadata(req.Type, tenant)
+		if err != nil {
+			return nil, err
+		}
+		return res.Content, nil
+	}
+}
+
+func DecodeLoadMetadataRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	dictionaryType := vars["type"]
+	return metadataRequest{Type: dictionaryType}, nil
+}
+
 //func MakeTranslateDictionaryItemEndpoint(service *service.DictionaryService) endpoint.Endpoint {
 //	return func(ctx context.Context, request interface{}) (interface{}, error) {
 //
@@ -57,15 +104,15 @@ type saveShallowDictionaryRequest struct {
 func MakeDeleteDictionaryByTypeEndpoint(service *service.DictionaryService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		tenant := extractTenant(ctx)
-		req := request.(deleteDictionaryByTypeRequest)
+		req := request.(byTypeRequest)
 		return nil, service.DeleteByType(req.Type, tenant)
 	}
 }
 
-func DecodeDeleteDictionaryByTypeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeByTypeRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	dictionaryType := vars["type"]
-	return deleteDictionaryByTypeRequest{Type: dictionaryType}, nil
+	return byTypeRequest{Type: dictionaryType}, nil
 }
 
 func MakeDeleteAllDictionaryEndpoint(service *service.DictionaryService) endpoint.Endpoint {
@@ -296,6 +343,24 @@ func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface
 	}
 
 	return json.NewEncoder(w).Encode(response)
+}
+
+func EncodeMetadataResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	headers := w.Header()
+	headers.Set("Content-Type", "application/json; charset=utf-8")
+	headers.Set("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
+	headers.Set("X-Content-Type-Options", "nosniff")
+	headers.Set("X-XSS-Protection", "1; mode=block")
+	headers.Set("Pragma", "no-cache")
+	headers.Set("Expires", "0")
+	headers.Set("X-Frame-Options", "DENY")
+
+	if _, err := response.(*RestError); err {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	_, err := io.WriteString(w, response.(string))
+	return err
 }
 
 func EncodeSavedResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {

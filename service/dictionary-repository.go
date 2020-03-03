@@ -132,7 +132,11 @@ func (s *dictionaryRepository) LoadChildrenKeys(parentKey, dictionaryType, tenan
 }
 
 func (s *dictionaryRepository) LoadByType(dictionaryType, tenant string) ([]model.Dictionary, error) {
-	return nil, nil
+
+	var res []model.Dictionary
+	err := s.db.Model(&res).Where("type = ? and tenant = ?", dictionaryType, tenant).
+		Select()
+	return res, err
 }
 
 func (s *dictionaryRepository) DeleteMultiple(keys ChildrenKeys, tenant, dictionaryType string) error {

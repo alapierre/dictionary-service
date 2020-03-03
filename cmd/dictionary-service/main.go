@@ -44,7 +44,7 @@ func main() {
 	slog.Infof("database name: %s host: %s user: %s", c.DatasourceName, c.DatasourceHost, c.DatasourceUser)
 
 	transport.DefaultLanguage = language.MustParse(c.DefaultLanguage)
-	slog.Info("Default language is %v", transport.DefaultLanguage)
+	slog.Info("Default language is ", transport.DefaultLanguage)
 
 	db := connectDb()
 	defer util.Close(db)
@@ -53,13 +53,32 @@ func main() {
 
 	dictionaryRepository := service.NewDictionaryRepository(db)
 	translationRepository := service.NewTranslateRepository(db)
-	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository)
+	metadataRepository := service.NewDictionaryMetadataRepository(db)
+	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository, metadataRepository)
 
 	r := mux.NewRouter()
 	r.Use(addContext)
 
 	r.Methods("GET").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
 		transport.MakeLoadDictEndpoint(dictionaryService),
+		transport.DecodeLoadDictRequest,
+		transport.EncodeResponse,
+	))
+
+	r.Methods("GET").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
+		transport.MakeLoadMetadataEndpoint(dictionaryService),
+		transport.DecodeLoadMetadataRequest,
+		transport.EncodeMetadataResponse,
+	))
+
+	r.Methods("GET").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
+		transport.MakeLoadDictionaryByType(dictionaryService),
+		transport.DecodeByTypeRequest,
+		transport.EncodeResponse,
+	))
+
+	r.Methods("GET").Path("/api/dictionary/{type}/{key}/shallow").Handler(httptransport.NewServer(
+		transport.MakeLoadDictShallowEndpoint(dictionaryService),
 		transport.DecodeLoadDictRequest,
 		transport.EncodeResponse,
 	))
@@ -104,7 +123,7 @@ func main() {
 
 	r.Methods("DELETE").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
 		transport.MakeDeleteDictionaryByTypeEndpoint(dictionaryService),
-		transport.DecodeDeleteDictionaryByTypeRequest,
+		transport.DecodeByTypeRequest,
 		transport.EncodeSavedResponse,
 	))
 

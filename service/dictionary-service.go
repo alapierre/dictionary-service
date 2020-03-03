@@ -6,13 +6,18 @@ import (
 	"golang.org/x/text/language"
 )
 
-func NewDictionaryService(dictionaryRepository DictionaryRepository, translateRepository TranslateRepository) *DictionaryService {
-	return &DictionaryService{dictionaryRepository: dictionaryRepository, translationRepository: translateRepository}
+func NewDictionaryService(dictionaryRepository DictionaryRepository, translateRepository TranslateRepository, metadataRepository DictionaryMetadataRepository) *DictionaryService {
+	return &DictionaryService{
+		dictionaryRepository:  dictionaryRepository,
+		translationRepository: translateRepository,
+		metadataRepository:    metadataRepository,
+	}
 }
 
 type DictionaryService struct {
 	dictionaryRepository  DictionaryRepository
 	translationRepository TranslateRepository
+	metadataRepository    DictionaryMetadataRepository
 }
 
 func (s *DictionaryService) LoadShallow(key, dictionaryType, tenant string) (map[string]interface{}, error) {
@@ -149,6 +154,18 @@ func (s *DictionaryService) AvailableTranslation(key, dictionaryType, tenant str
 	return s.translationRepository.AvailableTranslation(key, dictionaryType, tenant)
 }
 
+func (s *DictionaryService) LoadMetadata(dictionaryType, tenant string) (*model.DictionaryMetadata, error) {
+	return s.metadataRepository.Load(dictionaryType, tenant)
+}
+
+func (s *DictionaryService) SaveMetadata(metadata *model.DictionaryMetadata) error {
+	return s.metadataRepository.Save(metadata)
+}
+
+func (s *DictionaryService) UpdateMetadata(metadata *model.DictionaryMetadata) error {
+	return s.metadataRepository.Update(metadata)
+}
+
 // transaction should be began before call this
 func (s *DictionaryService) saveChildren(parent *model.ParentDictionary) error {
 	for _, child := range parent.Children {
@@ -182,6 +199,10 @@ func (s *DictionaryService) updateChildren(parent *model.ParentDictionary) error
 		return s.dictionaryRepository.DeleteMultiple(keys, parent.Tenant, parent.Type)
 	}
 	return nil
+}
+
+func (s *DictionaryService) LoadByType(dictionaryType string, tenant string) ([]model.Dictionary, error) {
+	return s.dictionaryRepository.LoadByType(dictionaryType, tenant)
 }
 
 type childrenMap map[string]interface{}
