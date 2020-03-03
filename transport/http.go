@@ -89,6 +89,14 @@ func MakeLoadMetadataEndpoint(service *service.DictionaryService) endpoint.Endpo
 	}
 }
 
+func MakeAvailableDictionaryTypesEndpoint(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		tenant := extractTenant(ctx)
+		types, err := service.AvailableDictionaryTypes(tenant)
+		return types, err
+	}
+}
+
 func DecodeLoadMetadataRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	dictionaryType := vars["type"]
