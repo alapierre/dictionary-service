@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"dictionaries-service/eureka"
 	"dictionaries-service/service"
 	"dictionaries-service/transport"
 	"dictionaries-service/util"
@@ -138,6 +139,10 @@ func main() {
 	http.Handle("/", r)
 
 	slog.Info("Started on port ", c.ServerPort)
+
+	eurekaInstance, err := eureka.Register(c.EurekaServiceUrl, c.ServerPort, "dictionary-service", "/api/dictionary/AbsenceType")
+	util.FailOnError(err, "can't register with Eureka")
+	defer eurekaInstance.Deregister()
 
 	startHttpAndWaitForSigINT(c.ServerPort)
 
