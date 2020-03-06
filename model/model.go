@@ -9,27 +9,47 @@ type Dictionary struct {
 	Key       string                 `pg:"key,pk"`
 	Type      string                 `pg:"type,pk"`
 	Name      string                 `pg:"name"`
-	GroupID   *string                `pg:"group_id"`
+	GroupId   *string                `pg:"group_id"`
 	Tenant    string                 `pg:"tenant,pk,use_zero"`
 	Content   map[string]interface{} `pg:"content"`
 	ParentKey *string                `pg:"parent_key"`
 }
 
+//noinspection ALL
+type Translation struct {
+	tableName struct{} `pg:"translation,alias:t"`
+
+	Key      string `pg:"key,pk"`
+	Type     string `pg:"type,pk"`
+	Tenant   string `pg:"tenant,pk,use_zero"`
+	Language string `pg:"language,pk"`
+	Name     string `pg:"name"`
+}
+
+//noinspection ALL
+type DictionaryMetadata struct {
+	tableName struct{} `pg:"dictionary_metadata,alias:m"`
+
+	Type    string `pg:"type,pk"`
+	Tenant  string `pg:"tenant,pk,use_zero"`
+	Content string `pg:"content"`
+}
+
 // helper indirect model
 
 type ParentDictionary struct {
-	Key      string
-	Type     string
-	Name     string
-	GroupId  *string
-	Tenant   string
-	Content  map[string]interface{}
-	Children []ChildDictionary
+	Key      string                 `json:"key"`
+	Type     string                 `json:"type"`
+	Name     string                 `json:"name"`
+	GroupId  *string                `json:"group_id"`
+	Tenant   string                 `json:"tenant"`
+	Content  map[string]interface{} `json:"content"`
+	Children []ChildDictionary      `json:"children"`
 }
 
 type ChildDictionary struct {
-	Key       string
-	Name      string
-	ParentKey string
-	Content   map[string]interface{}
+	Key       string                 `json:"key"`
+	Name      string                 `json:"name"`
+	ParentKey string                 `json:"parent_key"`
+	Content   map[string]interface{} `json:"content"`
 }
