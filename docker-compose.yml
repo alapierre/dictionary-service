@@ -12,7 +12,7 @@ services:
       - "5432:5432"
 
   eureka:
-    image: dc.sidgroup.pl/s4t-eureka:1.0.8
+    image: lapierre/eureka:1.0.1
     ports:
       - "8761:8761"
 
