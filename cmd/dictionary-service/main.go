@@ -58,7 +58,7 @@ func main() {
 	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository, metadataRepository)
 
 	r := mux.NewRouter()
-	r.Use(addContext)
+	r.Use(addContext, accessControlMiddleware)
 
 	r.Methods("GET").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
 		transport.MakeLoadDictEndpoint(dictionaryService),
@@ -80,6 +80,18 @@ func main() {
 		transport.EncodeResponse,
 	))
 
+	r.Methods("POST", "OPTIONS").Path("/api/metadata").Handler(httptransport.NewServer(
+		transport.MakeSaveMetadataEndpoint(dictionaryService),
+		transport.DecodeSaveMetadataRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("PUT", "OPTIONS").Path("/api/metadata").Handler(httptransport.NewServer(
+		transport.MakeUpdateMetadataEndpoint(dictionaryService),
+		transport.DecodeSaveMetadataRequest,
+		transport.EncodeSavedResponse,
+	))
+
 	r.Methods("GET").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
 		transport.MakeLoadDictionaryByType(dictionaryService),
 		transport.DecodeByTypeRequest,
@@ -92,31 +104,31 @@ func main() {
 		transport.EncodeResponse,
 	))
 
-	r.Methods("POST").Path("/api/dictionary").Handler(httptransport.NewServer(
+	r.Methods("POST", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
 		transport.MakeSaveDictionaryEndpoint(dictionaryService),
 		transport.DecodeSaveDictRequest,
 		transport.EncodeSavedResponse,
 	))
 
-	r.Methods("PUT").Path("/api/dictionary").Handler(httptransport.NewServer(
+	r.Methods("PUT", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
 		transport.MakeUpdateDictionaryEndpoint(dictionaryService),
 		transport.DecodeSaveDictRequest,
 		transport.EncodeSavedResponse,
 	))
 
-	r.Methods("POST").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
+	r.Methods("POST", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
 		transport.MakeShallowSaveDictionaryEndpoint(dictionaryService),
 		transport.DecodeShallowSaveDictionaryRequest,
 		transport.EncodeSavedResponse,
 	))
 
-	r.Methods("PUT").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
+	r.Methods("PUT", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
 		transport.MakeShallowUpdateDictionaryEndpoint(dictionaryService),
 		transport.DecodeShallowSaveDictionaryRequest,
 		transport.EncodeSavedResponse,
 	))
 
-	r.Methods("DELETE").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
+	r.Methods("DELETE", "OPTIONS").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
 		transport.MakeDeleteDictionaryEndpoint(dictionaryService),
 		transport.DecodeLoadDictRequest,
 		transport.EncodeSavedResponse,
@@ -147,6 +159,20 @@ func main() {
 	startHttpAndWaitForSigINT(c.ServerPort)
 
 	slog.Info("Bye.")
+}
+
+func accessControlMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS,PUT")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
+
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func startHttpAndWaitForSigINT(port int) {

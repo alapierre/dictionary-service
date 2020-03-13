@@ -44,6 +44,11 @@ type metadataRequest struct {
 	Type string
 }
 
+type saveMetadataRequest struct {
+	Type    string
+	Content string
+}
+
 type saveShallowDictionaryRequest struct {
 	Key       string                 `json:"key"`
 	Type      string                 `json:"type"`
@@ -94,6 +99,35 @@ func MakeAvailableDictionaryTypesEndpoint(service *service.DictionaryService) en
 		tenant := extractTenant(ctx)
 		types, err := service.AvailableDictionaryTypes(tenant)
 		return types, err
+	}
+}
+
+func MakeSaveMetadataEndpoint(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		tenant := extractTenant(ctx)
+		req := request.(saveMetadataRequest)
+
+		err := service.SaveMetadata(metadataRequestToDictionaryMetadata(req, tenant))
+
+		if err != nil {
+			return makeRestError(err, "cant_create_new_dictionary_metadata")
+		}
+		return nil, nil
+	}
+}
+
+func MakeUpdateMetadataEndpoint(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		tenant := extractTenant(ctx)
+		req := request.(saveMetadataRequest)
+		slog.Info("Trying to save: req: ", request)
+
+		err := service.UpdateMetadata(metadataRequestToDictionaryMetadata(req, tenant))
+
+		if err != nil {
+			return makeRestError(err, "cant_update_dictionary_metadata")
+		}
+		return nil, nil
 	}
 }
 
@@ -281,6 +315,20 @@ func DecodeLoadDictRequest(_ context.Context, r *http.Request) (interface{}, err
 	return dictionaryRequest{Key: key, Type: dictionaryType}, nil
 }
 
+func DecodeSaveMetadataRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var request saveMetadataRequest
+	if err := json.Unmarshal(bodyBytes, &request); err != nil {
+		return nil, err
+	}
+	return request, nil
+
+}
+
 func extractTenant(ctx context.Context) string {
 	return ctx.Value("tenant").(string)
 }
@@ -399,5 +447,13 @@ func shallowDictionaryToDictionary(req saveShallowDictionaryRequest, tenant stri
 		Tenant:    tenant,
 		Content:   req.Content,
 		ParentKey: req.ParentKey,
+	}
+}
+
+func metadataRequestToDictionaryMetadata(req saveMetadataRequest, tenant string) *model.DictionaryMetadata {
+	return &model.DictionaryMetadata{
+		Type:    req.Type,
+		Tenant:  tenant,
+		Content: req.Content,
 	}
 }
