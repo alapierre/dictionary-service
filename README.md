@@ -222,6 +222,51 @@ Result
 }
 ```
 
+#### Load all available dictionary metadata
+
+```
+GET /api/dictionary/metadata
+X-Tenant: default
+Accept-Language: en-EN
+```
+Result
+```
+["type1", "type2", "type3"]
+```
+
+#### Load dictionary metadata by type
+
+```
+GET /api/dictionary/metadata/{type}
+X-Tenant: default
+Accept-Language: en-EN
+```
+
+Example result
+
+```
+{
+  "$id": "https://alapierre.io/dictionary.schema.json",
+  "type": "object",
+  "title": "DictionaryAbsenceTypeTitle",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "onlyOnBeginOrEnd": {
+      "type": "boolean",
+      "description": "Absence can only start on beginning or finish on end of work day"
+    },
+    "needDeliveryDateConfirmation": {
+      "type": "boolean",
+      "description": "Is proof of absence delivery date required - should field be visible on form"
+    },
+    "needConfirmationDocumentNumber": {
+      "type": "boolean",
+      "description": "Is absence confirmation document number needed"
+    }
+  }
+}
+```
+
 ### Add new dictionary metadata
 
 ```
