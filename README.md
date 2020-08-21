@@ -54,12 +54,18 @@ services:
     ports:
       - "5432:5432"
 
+  eureka:
+    image: lapierre/eureka:1.0.1
+    ports:
+      - "8761:8761"
+
   dict:
     image: lapierre/dictionary-service:0.0.5
     environment:
       - DICT_DATASOURCE_HOST=db:5432
       - DICT_DATASOURCE_PASSWORD=qwedsazxc
       - DICT_DATASOURCE_USER=app
+      - DICT_EUREKA_SERVICE_URL=http://eureka:8761/eureka
     ports:
       - "9098:9098"
 
