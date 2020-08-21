@@ -11,9 +11,10 @@ import (
 )
 
 var (
-	db             *pg.DB
-	service        *DictionaryService
-	dictRepository DictionaryRepository
+	db                 *pg.DB
+	service            *DictionaryService
+	dictRepository     DictionaryRepository
+	metadataRepository DictionaryMetadataRepository
 )
 
 func TestMain(m *testing.M) {
@@ -23,7 +24,9 @@ func TestMain(m *testing.M) {
 	db = connectTestDb()
 
 	dictRepository = NewDictionaryRepository(db)
-	service = NewDictionaryService(dictRepository)
+	translationRepository := NewTranslateRepository(db)
+	metadataRepository = NewDictionaryMetadataRepository(db)
+	service = NewDictionaryService(dictRepository, translationRepository, metadataRepository)
 
 	ex := m.Run()
 

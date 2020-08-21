@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"dictionaries-service/eureka"
 	"dictionaries-service/service"
 	"dictionaries-service/transport"
 	"dictionaries-service/util"
@@ -13,6 +14,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
+	"golang.org/x/text/language"
 	"net/http"
 	"os"
 	"os/signal"
@@ -29,6 +31,7 @@ type Config struct {
 	DatasourcePoolSize   int    `split_words:"true" default:"2"`
 	DatasourceMaxRetries int    `split_words:"true" default:"3"`
 	EurekaServiceUrl     string `split_words:"true" default:"http://localhost:8761/eureka"`
+	DefaultLanguage      string `split_words:"true" default:"en"`
 }
 
 var c Config
@@ -41,16 +44,21 @@ func main() {
 
 	slog.Infof("database name: %s host: %s user: %s", c.DatasourceName, c.DatasourceHost, c.DatasourceUser)
 
+	transport.DefaultLanguage = language.MustParse(c.DefaultLanguage)
+	slog.Info("Default language is ", transport.DefaultLanguage)
+
 	db := connectDb()
 	defer util.Close(db)
 
 	migrate(db)
 
 	dictionaryRepository := service.NewDictionaryRepository(db)
-	dictionaryService := service.NewDictionaryService(dictionaryRepository)
+	translationRepository := service.NewTranslateRepository(db)
+	metadataRepository := service.NewDictionaryMetadataRepository(db)
+	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository, metadataRepository)
 
 	r := mux.NewRouter()
-	r.Use(addContext)
+	r.Use(addContext, accessControlMiddleware)
 
 	r.Methods("GET").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
 		transport.MakeLoadDictEndpoint(dictionaryService),
@@ -58,15 +66,85 @@ func main() {
 		transport.EncodeResponse,
 	))
 
-	r.Methods("POST").Path("/api/dictionary").Handler(httptransport.NewServer(
+	r.Methods("GET").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
+		transport.MakeLoadMetadataEndpoint(dictionaryService),
+		transport.DecodeLoadMetadataRequest,
+		transport.EncodeMetadataResponse,
+	))
+
+	r.Methods("GET").Path("/api/metadata").Handler(httptransport.NewServer(
+		transport.MakeAvailableDictionaryTypesEndpoint(dictionaryService),
+		func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
+			return nil, nil
+		},
+		transport.EncodeResponse,
+	))
+
+	r.Methods("POST", "OPTIONS").Path("/api/metadata").Handler(httptransport.NewServer(
+		transport.MakeSaveMetadataEndpoint(dictionaryService),
+		transport.DecodeSaveMetadataRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("PUT", "OPTIONS").Path("/api/metadata").Handler(httptransport.NewServer(
+		transport.MakeUpdateMetadataEndpoint(dictionaryService),
+		transport.DecodeSaveMetadataRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("GET").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
+		transport.MakeLoadDictionaryByType(dictionaryService),
+		transport.DecodeByTypeRequest,
+		transport.EncodeResponse,
+	))
+
+	r.Methods("GET").Path("/api/dictionary/{type}/{key}/shallow").Handler(httptransport.NewServer(
+		transport.MakeLoadDictShallowEndpoint(dictionaryService),
+		transport.DecodeLoadDictRequest,
+		transport.EncodeResponse,
+	))
+
+	r.Methods("POST", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
 		transport.MakeSaveDictionaryEndpoint(dictionaryService),
 		transport.DecodeSaveDictRequest,
 		transport.EncodeSavedResponse,
 	))
 
-	r.Methods("PUT").Path("/api/dictionary").Handler(httptransport.NewServer(
+	r.Methods("PUT", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
 		transport.MakeUpdateDictionaryEndpoint(dictionaryService),
 		transport.DecodeSaveDictRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("POST", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
+		transport.MakeShallowSaveDictionaryEndpoint(dictionaryService),
+		transport.DecodeShallowSaveDictionaryRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("PUT", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
+		transport.MakeShallowUpdateDictionaryEndpoint(dictionaryService),
+		transport.DecodeShallowSaveDictionaryRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("DELETE", "OPTIONS").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
+		transport.MakeDeleteDictionaryEndpoint(dictionaryService),
+		transport.DecodeLoadDictRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("DELETE").Path("/api/dictionary/all").Handler(httptransport.NewServer(
+		transport.MakeDeleteAllDictionaryEndpoint(dictionaryService),
+		func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
+			return nil, nil
+		},
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("DELETE").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
+		transport.MakeDeleteDictionaryByTypeEndpoint(dictionaryService),
+		transport.DecodeByTypeRequest,
 		transport.EncodeSavedResponse,
 	))
 
@@ -74,9 +152,27 @@ func main() {
 
 	slog.Info("Started on port ", c.ServerPort)
 
+	eurekaInstance, err := eureka.Register(c.EurekaServiceUrl, c.ServerPort, "dictionary-service", "/api/dictionary/AbsenceType")
+	util.FailOnError(err, "can't register with Eureka")
+	defer eurekaInstance.Deregister()
+
 	startHttpAndWaitForSigINT(c.ServerPort)
 
 	slog.Info("Bye.")
+}
+
+func accessControlMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS,PUT")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
+
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func startHttpAndWaitForSigINT(port int) {
@@ -140,7 +236,7 @@ func migrate(db *pg.DB) {
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
-		fmt.Println("0 args ")
+		slog.Info("0 command line args ")
 		_, _, err := migrations.Run(db, "init")
 		if err != nil {
 			slog.Infof("initializing migration %v", err)
@@ -159,7 +255,10 @@ func migrate(db *pg.DB) {
 
 func addContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		ctx := context.WithValue(r.Context(), "tenant", "")
+		ctx = context.WithValue(ctx, "language", r.Header.Get("Accept-Language"))
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

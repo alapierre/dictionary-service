@@ -12,12 +12,12 @@ services:
       - "5432:5432"
 
   eureka:
-    image: dc.sidgroup.pl/s4t-eureka:1.0.8
+    image: lapierre/eureka:1.0.1
     ports:
       - "8761:8761"
 
   dict:
-    image: lapierre/dictionary-service:0.0.2
+    image: lapierre/dictionary-service:0.0.5
     environment:
       - DICT_DATASOURCE_HOST=db:5432
       - DICT_DATASOURCE_PASSWORD=qwedsazxc

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/dictionaries-service.iml" filepath="$PROJECT_DIR$/dictionaries-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dictionary-service.iml" filepath="$PROJECT_DIR$/dictionary-service.iml" />
     </modules>
   </component>
 </project>

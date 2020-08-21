@@ -3,6 +3,8 @@ package service
 import (
 	"dictionaries-service/model"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/text/language"
 	"testing"
 )
 
@@ -80,4 +82,13 @@ func TestDictionaryService_UpdateParent(t *testing.T) {
 	if err := service.UpdateParent(&p); err != nil {
 		t.Errorf("Problem with save parent %v", err)
 	}
+}
+
+func TestDictionaryService_LoadTranslated(t *testing.T) {
+
+	res, err := service.LoadTranslated("uw", "AbsenceType", "", language.MustParse("en"))
+	assert.NoError(t, err)
+
+	fmt.Println(res)
+
 }
