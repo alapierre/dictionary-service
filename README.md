@@ -357,7 +357,6 @@ Empty body
 ### Next steps, coming soon
 
 - Translate dictionary name base on Accept-Language header
-- Dictionary description, store, load and update
 - Configuration store, load and update
 - True unit tests
 - Integration tests
