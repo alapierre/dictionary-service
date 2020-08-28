@@ -54,12 +54,18 @@ services:
     ports:
       - "5432:5432"
 
+  eureka:
+    image: lapierre/eureka:1.0.1
+    ports:
+      - "8761:8761"
+
   dict:
-    image: lapierre/dictionary-service:0.0.5
+    image: lapierre/dictionary-service:0.0.6
     environment:
       - DICT_DATASOURCE_HOST=db:5432
       - DICT_DATASOURCE_PASSWORD=qwedsazxc
       - DICT_DATASOURCE_USER=app
+      - DICT_EUREKA_SERVICE_URL=http://eureka:8761/eureka
     ports:
       - "9098:9098"
 
@@ -222,19 +228,83 @@ Result
 }
 ```
 
+#### Load all available dictionary metadata
+
+```
+GET /api/dictionary/metadata
+X-Tenant: default
+Accept-Language: en-EN
+```
+Result
+```
+["type1", "type2", "type3"]
+```
+
+#### Load dictionary metadata by type
+
+```
+GET /api/dictionary/metadata/{type}
+X-Tenant: default
+Accept-Language: en-EN
+```
+
+Example result
+
+```
+{
+  "$id": "https://alapierre.io/dictionary.schema.json",
+  "type": "object",
+  "title": "DictionaryAbsenceTypeTitle",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "onlyOnBeginOrEnd": {
+      "type": "boolean",
+      "description": "Absence can only start on beginning or finish on end of work day"
+    },
+    "needDeliveryDateConfirmation": {
+      "type": "boolean",
+      "description": "Is proof of absence delivery date required - should field be visible on form"
+    },
+    "needConfirmationDocumentNumber": {
+      "type": "boolean",
+      "description": "Is absence confirmation document number needed"
+    }
+  }
+}
+```
+
 ### Add new dictionary metadata
 
 ```
-###
-POST http://localhost:9098/api/metadata
+POST http://localhost:9098/api/metadata/DictionaryAbsenceType
 X-Tenant: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Content-Type: application/json
 
 {
-  "Type": "ExampleType",
-  "Content": "{\"$id\":\"https:\/\/alapierre.io\/dictionary.schema.json\",\"$schema\":\"http:\/\/json-schema.org\/draft-07\/schema#\",\"title\":\"DictionaryAbsenceType\",\"type\":\"object\",\"required\":[\"onlyOnBeginOrEnd\",\"needDeliveryDateConfirmation\",\"needConfirmationDocumentNumber\"],\"properties\":{\"onlyOnBeginOrEnd\":{\"type\":\"boolean\",\"description\":\"Absence can only start on beginning or finish on end of work day\",\"default\":false},\"needDeliveryDateConfirmation\":{\"type\":\"boolean\",\"default\":false,\"description\":\"Is proof of absence delivery date required - should field be visible on form\"},\"needConfirmationDocumentNumber\":{\"description\":\"Is absence confirmation document number needed\",\"type\":\"boolean\",\"default\":false}}}"
+  "$id": "https://alapierre.io/dictionary.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DictionaryAbsenceType",
+  "type": "object",
+  "required": [ "onlyOnBeginOrEnd", "needDeliveryDateConfirmation", "needConfirmationDocumentNumber" ],
+  "properties": {
+    "onlyOnBeginOrEnd": {
+      "type": "boolean",
+      "description": "Absence can only start on beginning or finish on end of work day",
+      "default": false
+    },
+    "needDeliveryDateConfirmation": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is proof of absence delivery date required - should field be visible on form"
+    },
+    "needConfirmationDocumentNumber": {
+      "description": "Is absence confirmation document number needed",
+      "type": "boolean",
+      "default": false
+    }
+  }
 }
 ```
 
@@ -247,15 +317,35 @@ Empty body
 
 ```
 ###
-PUT http://localhost:9098/api/metadata
+PUT http://localhost:9098/api/metadata/DictionaryAbsenceType
 X-Tenant: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Content-Type: application/json
 
 {
-  "Type": "ExampleType",
-  "Content": "{\"$id\":\"https:\/\/alapierre.io\/dictionary.schema.json\",\"$schema\":\"http:\/\/json-schema.org\/draft-07\/schema#\",\"title\":\"DictionaryAbsenceType\",\"type\":\"object\",\"required\":[\"onlyOnBeginOrEnd\",\"needDeliveryDateConfirmation\",\"needConfirmationDocumentNumber\"],\"properties\":{\"onlyOnBeginOrEnd\":{\"type\":\"boolean\",\"description\":\"Absence can only start on beginning or finish on end of work day\",\"default\":false},\"needDeliveryDateConfirmation\":{\"type\":\"boolean\",\"default\":false,\"description\":\"Is proof of absence delivery date required - should field be visible on form\"},\"needConfirmationDocumentNumber\":{\"description\":\"Is absence confirmation document number needed\",\"type\":\"boolean\",\"default\":false}}}"
+  "$id": "https://alapierre.io/dictionary.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DictionaryAbsenceType",
+  "type": "object",
+  "required": [ "onlyOnBeginOrEnd", "needDeliveryDateConfirmation", "needConfirmationDocumentNumber" ],
+  "properties": {
+    "onlyOnBeginOrEnd": {
+      "type": "boolean",
+      "description": "Absence can only start on beginning or finish on end of work day",
+      "default": false
+    },
+    "needDeliveryDateConfirmation": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is proof of absence delivery date required - should field be visible on form"
+    },
+    "needConfirmationDocumentNumber": {
+      "description": "Is absence confirmation document number needed",
+      "type": "boolean",
+      "default": false
+    }
+  }
 }
 ```
 

@@ -86,9 +86,21 @@ func main() {
 		transport.EncodeSavedResponse,
 	))
 
-	r.Methods("PUT", "OPTIONS").Path("/api/metadata").Handler(httptransport.NewServer(
-		transport.MakeUpdateMetadataEndpoint(dictionaryService),
+	r.Methods("POST", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
+		transport.MakeSaveMetadataEndpointBetter(dictionaryService),
+		transport.DecodeSaveMetadataRequestBetter,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("PUT", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
+		transport.MakeUpdateMetadataEndpointBetter(dictionaryService),
 		transport.DecodeSaveMetadataRequest,
+		transport.EncodeSavedResponse,
+	))
+
+	r.Methods("PUT", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
+		transport.MakeSaveMetadataEndpointBetter(dictionaryService),
+		transport.DecodeSaveMetadataRequestBetter,
 		transport.EncodeSavedResponse,
 	))
 
@@ -159,20 +171,6 @@ func main() {
 	startHttpAndWaitForSigINT(c.ServerPort)
 
 	slog.Info("Bye.")
-}
-
-func accessControlMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS,PUT")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
-
-		if r.Method == "OPTIONS" {
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
 }
 
 func startHttpAndWaitForSigINT(port int) {
@@ -260,5 +258,20 @@ func addContext(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, "language", r.Header.Get("Accept-Language"))
 
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// access control and  CORS middleware
+func accessControlMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
+
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }
