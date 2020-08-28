@@ -49,6 +49,11 @@ type saveMetadataRequest struct {
 	Content string
 }
 
+type saveMetadataRequestBetter struct {
+	Type    string                 `json:"type"`
+	Content map[string]interface{} `json:"content"`
+}
+
 type saveShallowDictionaryRequest struct {
 	Key       string                 `json:"key"`
 	Type      string                 `json:"type"`
@@ -116,6 +121,20 @@ func MakeSaveMetadataEndpoint(service *service.DictionaryService) endpoint.Endpo
 	}
 }
 
+func MakeSaveMetadataEndpointBetter(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		tenant := extractTenant(ctx)
+		req := request.(saveMetadataRequestBetter)
+
+		err := service.SaveMetadata(metadataRequestToDictionaryMetadataBetter(req, tenant))
+
+		if err != nil {
+			return makeRestError(err, "cant_create_new_dictionary_metadata")
+		}
+		return nil, nil
+	}
+}
+
 func MakeUpdateMetadataEndpoint(service *service.DictionaryService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		tenant := extractTenant(ctx)
@@ -123,6 +142,21 @@ func MakeUpdateMetadataEndpoint(service *service.DictionaryService) endpoint.End
 		slog.Info("Trying to save: req: ", request)
 
 		err := service.UpdateMetadata(metadataRequestToDictionaryMetadata(req, tenant))
+
+		if err != nil {
+			return makeRestError(err, "cant_update_dictionary_metadata")
+		}
+		return nil, nil
+	}
+}
+
+func MakeUpdateMetadataEndpointBetter(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		tenant := extractTenant(ctx)
+		req := request.(saveMetadataRequestBetter)
+		slog.Info("Trying to save: req: ", request)
+
+		err := service.UpdateMetadata(metadataRequestToDictionaryMetadataBetter(req, tenant))
 
 		if err != nil {
 			return makeRestError(err, "cant_update_dictionary_metadata")
@@ -329,6 +363,27 @@ func DecodeSaveMetadataRequest(_ context.Context, r *http.Request) (interface{},
 
 }
 
+func DecodeSaveMetadataRequestBetter(_ context.Context, r *http.Request) (interface{}, error) {
+
+	vars := mux.Vars(r)
+	dictionaryType := vars["type"]
+
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var request saveMetadataRequestBetter
+	request.Type = dictionaryType
+
+	if err := json.Unmarshal(bodyBytes, &request.Content); err != nil {
+		return nil, err
+	}
+
+	return request, nil
+
+}
+
 func extractTenant(ctx context.Context) string {
 	return ctx.Value("tenant").(string)
 }
@@ -455,5 +510,16 @@ func metadataRequestToDictionaryMetadata(req saveMetadataRequest, tenant string)
 		Type:    req.Type,
 		Tenant:  tenant,
 		Content: req.Content,
+	}
+}
+
+func metadataRequestToDictionaryMetadataBetter(req saveMetadataRequestBetter, tenant string) *model.DictionaryMetadata {
+
+	content, _ := json.Marshal(req.Content)
+
+	return &model.DictionaryMetadata{
+		Type:    req.Type,
+		Tenant:  tenant,
+		Content: string(content),
 	}
 }
