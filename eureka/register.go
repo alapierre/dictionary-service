@@ -36,14 +36,14 @@ func Register(eurekaHost string, port int, serviceName, homePage string) (*eurek
 	fargoConfig.Eureka.PollIntervalSeconds = 1
 
 	instanceTest1 := &fargo.Instance{
-		HostName:         fmt.Sprintf("%s", hostname),
+		HostName:         fmt.Sprintf(ip),
 		InstanceId:       fmt.Sprintf("%s:%s:%d", hostname, serviceName, port),
 		Port:             port,
 		PortEnabled:      true,
 		App:              serviceName,
 		IPAddr:           ip,
-		VipAddress:       ip,
-		SecureVipAddress: ip,
+		VipAddress:       serviceName,
+		SecureVipAddress: serviceName,
 		HealthCheckUrl:   fmt.Sprintf("http://%s:%d/health", ip, port),
 		StatusPageUrl:    fmt.Sprintf("http://%s:%d/info", ip, port),
 		HomePageUrl:      fmt.Sprintf("http://%s:%d/%s", ip, port, homePage),

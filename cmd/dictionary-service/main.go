@@ -164,7 +164,7 @@ func main() {
 
 	slog.Info("Started on port ", c.ServerPort)
 
-	eurekaInstance, err := eureka.Register(c.EurekaServiceUrl, c.ServerPort, "dictionary-service", "/api/dictionary/AbsenceType")
+	eurekaInstance, err := eureka.Register(c.EurekaServiceUrl, c.ServerPort, "dictionary-service", "")
 	util.FailOnError(err, "can't register with Eureka")
 	defer eurekaInstance.Deregister()
 
