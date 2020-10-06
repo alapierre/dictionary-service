@@ -6,33 +6,33 @@ package model
 type Dictionary struct {
 	tableName struct{} `pg:"dictionary,alias:p,discard_unknown_columns"`
 
-	Key       string                 `pg:"key,pk"`
-	Type      string                 `pg:"type,pk"`
-	Name      string                 `pg:"name"`
-	GroupId   *string                `pg:"group_id"`
-	Tenant    string                 `pg:"tenant,pk,use_zero"`
-	Content   map[string]interface{} `pg:"content"`
-	ParentKey *string                `pg:"parent_key"`
+	Key       string                 `pg:"key,pk" json:"key"`
+	Type      string                 `pg:"type,pk" json:"type"`
+	Name      string                 `pg:"name" json:"name"`
+	GroupId   *string                `pg:"group_id" json:"group_id"`
+	Tenant    string                 `pg:"tenant,pk,use_zero" json:"tenant"`
+	Content   map[string]interface{} `pg:"content" json:"content"`
+	ParentKey *string                `pg:"parent_key" json:"parent_key"`
 }
 
 //noinspection ALL
 type Translation struct {
 	tableName struct{} `pg:"translation,alias:t"`
 
-	Key      string `pg:"key,pk"`
-	Type     string `pg:"type,pk"`
-	Tenant   string `pg:"tenant,pk,use_zero"`
-	Language string `pg:"language,pk"`
-	Name     string `pg:"name"`
+	Key      string `pg:"key,pk"  json:"key"`
+	Type     string `pg:"type,pk" json:"type"`
+	Tenant   string `pg:"tenant,pk,use_zero" json:"tenant"`
+	Language string `pg:"language,pk" json:"language"`
+	Name     string `pg:"name" json:"name"`
 }
 
 //noinspection ALL
 type DictionaryMetadata struct {
 	tableName struct{} `pg:"dictionary_metadata,alias:m"`
 
-	Type    string `pg:"type,pk"`
-	Tenant  string `pg:"tenant,pk,use_zero"`
-	Content string `pg:"content"`
+	Type    string `pg:"type,pk" json:"type"`
+	Tenant  string `pg:"tenant,pk,use_zero" json:"tenant"`
+	Content string `pg:"content" json:"content"`
 }
 
 // helper indirect model
