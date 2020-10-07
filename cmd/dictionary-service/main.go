@@ -32,6 +32,7 @@ type Config struct {
 	DatasourceMaxRetries int    `split_words:"true" default:"3"`
 	EurekaServiceUrl     string `split_words:"true" default:"http://localhost:8761/eureka"`
 	DefaultLanguage      string `split_words:"true" default:"en"`
+	InitDBConnectionRets int    `split_words:"true" default:"100"`
 }
 
 var c Config
@@ -226,6 +227,15 @@ func connectDb() *pg.DB {
 
 	//err := model.CreateSchema(db)
 	//util.FailOnError(err, "Cant create schema")
+
+	for i := 0; i < c.InitDBConnectionRets; i++ {
+		_, err := db.Exec("select 1")
+		if err == nil {
+			break
+		}
+		time.Sleep(1)
+		slog.Info("trying to reconnect database")
+	}
 
 	return db
 }
