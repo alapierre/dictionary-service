@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"dictionaries-service/eureka"
 	"dictionaries-service/service"
 	"dictionaries-service/transport"
 	"dictionaries-service/util"
 	"flag"
 	"fmt"
+	"github.com/alapierre/gokit-utils/eureka"
 	slog "github.com/go-eden/slf4go"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/go-pg/migrations/v7"
@@ -57,6 +57,26 @@ func main() {
 	translationRepository := service.NewTranslateRepository(db)
 	metadataRepository := service.NewDictionaryMetadataRepository(db)
 	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository, metadataRepository)
+
+	r := makeEndpoints(dictionaryService)
+
+	http.Handle("/", r)
+	slog.Info("Started on port ", c.ServerPort)
+
+	eurekaInstance, err := eureka.New().
+		Default(c.ServerPort, "").
+		Register(c.EurekaServiceUrl, "dictionary-service")
+
+	util.FailOnError(err, "can't register with Eureka")
+
+	defer eurekaInstance.Deregister()
+
+	startHttpAndWaitForSigINT(c.ServerPort)
+
+	slog.Info("Bye.")
+}
+
+func makeEndpoints(dictionaryService *service.DictionaryService) *mux.Router {
 
 	r := mux.NewRouter()
 	r.Use(addContext, accessControlMiddleware)
@@ -160,18 +180,7 @@ func main() {
 		transport.DecodeByTypeRequest,
 		transport.EncodeSavedResponse,
 	))
-
-	http.Handle("/", r)
-
-	slog.Info("Started on port ", c.ServerPort)
-
-	eurekaInstance, err := eureka.Register(c.EurekaServiceUrl, c.ServerPort, "dictionary-service", "")
-	util.FailOnError(err, "can't register with Eureka")
-	defer eurekaInstance.Deregister()
-
-	startHttpAndWaitForSigINT(c.ServerPort)
-
-	slog.Info("Bye.")
+	return r
 }
 
 func startHttpAndWaitForSigINT(port int) {
