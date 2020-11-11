@@ -19,7 +19,7 @@ Almost any system needs to store and manage flexible dictionary values. Some of 
 
 ## Current status
 
-Pre alfa
+In tests on production in several commertial projects. 
 
 ## Required environment variables
 
