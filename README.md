@@ -76,6 +76,41 @@ volumes:
   pg_data:
 ```
 
+### Create dictionary entry metadata
+
+```
+POST http://localhost:9098/api/metadata/AbsenceType
+X-Tenant: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "$id": "https://alapierre.io/dictionary.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DictionaryAbsenceType",
+  "type": "object",
+  "required": [ "onlyOnBeginOrEnd", "needDeliveryDateConfirmation", "needConfirmationDocumentNumber" ],
+  "properties": {
+    "onlyOnBeginOrEnd": {
+      "type": "boolean",
+      "description": "Absence can only start on beginning or finish on end of work day",
+      "default": false
+    },
+    "needDeliveryDateConfirmation": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is proof of absence delivery date required - should field be visible on form"
+    },
+    "needConfirmationDocumentNumber": {
+      "description": "Is absence confirmation document number needed",
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
+```
+
 ### Save new dictionary entry
 
 ```
@@ -99,8 +134,8 @@ Accept-Language: en-EN
       "type": "AbsenceType"
     }
   ],
-  "key": "newP",
-  "name": "New parent",
+  "key": "HollidayLeave",
+  "name": "Holliday Leave",
   "needConfirmationDocumentNumber": false,
   "needDeliveryDateConfirmation": true,
   "onlyOnBeginOrEnd": true,
@@ -117,7 +152,7 @@ Accept-Language: en-EN
 #### Load parent dictionary entry with children
 
 ```
-GET /api/dictionary/AbsenceType/newP
+GET /api/dictionary/AbsenceType/HollidayLeave
 X-Tenant: default
 Accept-Language: en-EN
 ```
@@ -140,8 +175,8 @@ Result
       "type": "AbsenceType"
     }
   ],
-  "key": "newP",
-  "name": "New parent",
+  "key": "HollidayLeave",
+  "name": "Holliday Leave",
   "needConfirmationDocumentNumber": false,
   "needDeliveryDateConfirmation": true,
   "onlyOnBeginOrEnd": true,
@@ -153,7 +188,7 @@ Result
 #### Load child only dictionary entry
 
 ```
-GET /api/dictionary/AbsenceType/newCh1
+GET /api/dictionary/AbsenceType/HollidayLeave/newCh1
 X-Tenant: default
 Accept-Language: en-EN
 ```
@@ -194,7 +229,7 @@ Accept-Language: en-EN
       "type": "AbsenceType"
     }
   ],
-  "key": "newP",
+  "key": "HollidayLeave",
   "name": "New parent updated",
   "needConfirmationDocumentNumber": false,
   "needDeliveryDateConfirmation": false,
@@ -221,7 +256,7 @@ Result
       "type": "AbsenceType"
     }
   ],
-  "key": "newP",
+  "key": "HollidayLeave",
   "name": "New parent updated",
   "needConfirmationDocumentNumber": false,
   "needDeliveryDateConfirmation": false,
@@ -274,47 +309,6 @@ Example result
     }
   }
 }
-```
-
-### Add new dictionary metadata
-
-```
-POST http://localhost:9098/api/metadata/DictionaryAbsenceType
-X-Tenant: default
-Accept-Language: en-EN
-Cache-Control: no-cache
-Content-Type: application/json
-
-{
-  "$id": "https://alapierre.io/dictionary.schema.json",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "DictionaryAbsenceType",
-  "type": "object",
-  "required": [ "onlyOnBeginOrEnd", "needDeliveryDateConfirmation", "needConfirmationDocumentNumber" ],
-  "properties": {
-    "onlyOnBeginOrEnd": {
-      "type": "boolean",
-      "description": "Absence can only start on beginning or finish on end of work day",
-      "default": false
-    },
-    "needDeliveryDateConfirmation": {
-      "type": "boolean",
-      "default": false,
-      "description": "Is proof of absence delivery date required - should field be visible on form"
-    },
-    "needConfirmationDocumentNumber": {
-      "description": "Is absence confirmation document number needed",
-      "type": "boolean",
-      "default": false
-    }
-  }
-}
-```
-
-Result
-```
-Empty body
-```
 
 ### Update existing dictionary metadata
 
