@@ -24,13 +24,16 @@ Pre alfa
 - DICT_DATASOURCE_USER
 - DICT_DATASOURCE_PASSWORD
 
-...and more can be found in main.go
+...and more not mandatory settings can be found in main.go, eg:
 
-Default service connects to database on localhost:5432
+- INIT_DB_CONNECTION_RETS - how many time try to connect to database - it is useful in development on docker-compose 
+- DATASOURCE_SCHEMA - name of database schema to use
+
+Default service connects to database on localhost:5432 with schema dictionary and 100 retries
 
 ## How it works
 
-Do not forget to set environment variables.
+Do not forget to set environment variables (check Makefile or docker-compose.yml).
 
 ### Run in bash
 
@@ -60,7 +63,7 @@ services:
       - "8761:8761"
 
   dict:
-    image: lapierre/dictionary-service:0.0.8
+    image: lapierre/dictionary-service:0.0.10
     environment:
       - DICT_DATASOURCE_HOST=db:5432
       - DICT_DATASOURCE_PASSWORD=qwedsazxc
@@ -250,7 +253,7 @@ Accept-Language: en-EN
 
 Example result
 
-```
+```json
 {
   "$id": "https://alapierre.io/dictionary.schema.json",
   "type": "object",

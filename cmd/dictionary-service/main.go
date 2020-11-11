@@ -214,9 +214,6 @@ func startHttpAndWaitForSigINT(port int) {
 
 func connectDb() *pg.DB {
 
-	params := make(map[string]interface{})
-	params["search_path"] = "dictionary"
-
 	db := pg.Connect(&pg.Options{
 		User:       c.DatasourceUser,
 		Password:   c.DatasourcePassword,
@@ -225,17 +222,14 @@ func connectDb() *pg.DB {
 		PoolSize:   c.DatasourcePoolSize,
 		MaxRetries: c.DatasourceMaxRetries,
 
-		//OnConnect: func(conn *pg.Conn) error {
-		//	_, err := conn.Exec("set search_path=?", "scheduler")
-		//	if err != nil {
-		//		slog.Error(err)
-		//	}
-		//	return nil
-		//},
+		OnConnect: func(conn *pg.Conn) error {
+			_, err := conn.Exec("set search_path=?", c.DatasourceSchema)
+			if err != nil {
+				slog.Error(err)
+			}
+			return nil
+		},
 	})
-
-	//err := model.CreateSchema(db)
-	//util.FailOnError(err, "Cant create schema")
 
 	for i := 0; i < c.InitDBConnectionRets; i++ {
 		_, err := db.Exec("select 1")
@@ -252,9 +246,12 @@ func connectDb() *pg.DB {
 func migrate(db *pg.DB) {
 	flag.Parse()
 
+	def := migrations.DefaultCollection
+	def = def.SetTableName(fmt.Sprintf("%s.gopg_migrations", c.DatasourceSchema))
+
 	if len(flag.Args()) == 0 {
 		slog.Info("0 command line args ")
-		_, _, err := migrations.Run(db, "init")
+		_, _, err := def.Run(db, "init")
 		if err != nil {
 			slog.Infof("initializing migration %v", err)
 		}
