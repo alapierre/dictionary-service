@@ -3,8 +3,9 @@ package service
 import (
 	"dictionaries-service/model"
 	"dictionaries-service/util"
+	"fmt"
 	slog "github.com/go-eden/slf4go"
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 	"golang.org/x/text/language"
 )
 
@@ -66,13 +67,22 @@ func (s *dictionaryRepository) LoadTranslated(key, dictionaryType, tenant string
 }
 
 func (s *dictionaryRepository) Save(dict *model.Dictionary) error {
-	err := s.db.Insert(dict)
+	_, err := s.db.Model(dict).Insert()
 	return err
 }
 
 func (s *dictionaryRepository) Update(dict *model.Dictionary) error {
-	err := s.db.Update(dict)
-	return err
+	res, err := s.db.Model(dict).WherePK().Update()
+
+	if err != nil {
+		return err
+	}
+
+	if res.RowsAffected() == 0 {
+		return fmt.Errorf("not existing key=%s tenant=%s and type=%s", dict.Key, dict.Tenant, dict.Type)
+	}
+
+	return nil
 }
 
 func (s *dictionaryRepository) LoadAll(tenant string) ([]model.Dictionary, error) {
@@ -157,7 +167,10 @@ func (s *dictionaryRepository) DeleteMultiple(keys ChildrenKeys, tenant, diction
 }
 
 func (s *dictionaryRepository) Delete(key, dictionaryType, tenant string) error {
-	return s.db.Delete(&model.Dictionary{Key: key, Type: dictionaryType, Tenant: tenant})
+	_, err := s.db.Model(&model.Dictionary{Key: key, Type: dictionaryType, Tenant: tenant}).
+		WherePK().
+		Delete()
+	return err
 }
 
 func (s *dictionaryRepository) DeleteAll(tenant string) error {

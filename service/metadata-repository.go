@@ -3,7 +3,7 @@ package service
 import (
 	"dictionaries-service/model"
 	"dictionaries-service/util"
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 )
 
 func NewDictionaryMetadataRepository(db *pg.DB) DictionaryMetadataRepository {
@@ -29,7 +29,7 @@ func (s *dictionaryMetadataRepository) Load(dictionaryType, tenant string) (*mod
 		Type:   dictionaryType,
 		Tenant: tenant,
 	}
-	err := s.db.Select(metadata)
+	err := s.db.Model(metadata).Select()
 
 	return metadata, err
 }
@@ -39,17 +39,18 @@ func (s *dictionaryMetadataRepository) DoInTransaction(callback util.Transaction
 }
 
 func (s *dictionaryMetadataRepository) Save(metadata *model.DictionaryMetadata) error {
-	err := s.db.Insert(metadata)
+	_, err := s.db.Model(metadata).Insert()
 	return err
 }
 
 func (s *dictionaryMetadataRepository) Update(metadata *model.DictionaryMetadata) error {
-	err := s.db.Update(metadata)
+	_, err := s.db.Model(metadata).WherePK().Update()
 	return err
 }
 
 func (s *dictionaryMetadataRepository) Delete(metadata *model.DictionaryMetadata) error {
-	return s.db.Delete(metadata)
+	_, err := s.db.Model(metadata).WherePK().Delete()
+	return err
 }
 
 func (s *dictionaryMetadataRepository) AvailableDictionaryTypes(tenant string) ([]string, error) {

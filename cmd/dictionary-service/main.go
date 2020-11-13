@@ -10,8 +10,8 @@ import (
 	"github.com/alapierre/gokit-utils/eureka"
 	slog "github.com/go-eden/slf4go"
 	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/go-pg/migrations/v7"
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/migrations/v8"
+	"github.com/go-pg/pg/v10"
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/text/language"
@@ -33,6 +33,7 @@ type Config struct {
 	EurekaServiceUrl     string `split_words:"true" default:"http://localhost:8761/eureka"`
 	DefaultLanguage      string `split_words:"true" default:"en"`
 	InitDBConnectionRets int    `split_words:"true" default:"100"`
+	ShowSql              bool   `split_words:"true" default:"true"`
 }
 
 var c Config
@@ -222,7 +223,7 @@ func connectDb() *pg.DB {
 		PoolSize:   c.DatasourcePoolSize,
 		MaxRetries: c.DatasourceMaxRetries,
 
-		OnConnect: func(conn *pg.Conn) error {
+		OnConnect: func(ctx context.Context, conn *pg.Conn) error {
 			_, err := conn.Exec("set search_path=?", c.DatasourceSchema)
 			if err != nil {
 				slog.Error(err)
@@ -240,7 +241,22 @@ func connectDb() *pg.DB {
 		slog.Info("trying to reconnect database")
 	}
 
+	if c.ShowSql {
+		db.AddQueryHook(dbLogger{})
+	}
+
 	return db
+}
+
+type dbLogger struct{}
+
+func (d dbLogger) BeforeQuery(c context.Context, _ *pg.QueryEvent) (context.Context, error) {
+	return c, nil
+}
+
+func (d dbLogger) AfterQuery(_ context.Context, q *pg.QueryEvent) error {
+	slog.Debug(q.Query)
+	return nil
 }
 
 func migrate(db *pg.DB) {

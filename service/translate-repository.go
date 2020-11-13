@@ -3,7 +3,7 @@ package service
 import (
 	"dictionaries-service/model"
 	"dictionaries-service/util"
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 )
 
 func NewTranslateRepository(db *pg.DB) TranslateRepository {
@@ -33,12 +33,12 @@ func (s *translateRepository) DoInTransaction(callback util.TransactionCallback)
 }
 
 func (s *translateRepository) Save(translate *model.Translation) error {
-	err := s.db.Insert(translate)
+	_, err := s.db.Model(translate).Insert()
 	return err
 }
 
 func (s *translateRepository) Update(translate *model.Translation) error {
-	err := s.db.Update(translate)
+	_, err := s.db.Model(translate).WherePK().Update()
 	return err
 }
 
@@ -59,7 +59,8 @@ func (s *translateRepository) DeleteByKeyAndType(key, dictionaryType, tenant str
 }
 
 func (s *translateRepository) Delete(translation *model.Translation) error {
-	return s.db.Delete(translation)
+	_, err := s.db.Model(translation).WherePK().Delete()
+	return err
 }
 
 func (s *translateRepository) AvailableTranslation(key, dictionaryType, tenant string) ([]string, error) {
