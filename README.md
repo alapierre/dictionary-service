@@ -28,6 +28,7 @@ In tests on production in several commertial projects.
 
 - INIT_DB_CONNECTION_RETS - how many time try to connect to database - it is useful in development on docker-compose 
 - DATASOURCE_SCHEMA - name of database schema to use
+- DICT_SHOW_SQL - show SQL in DEBUG logs or not
 
 Default service connects to database on localhost:5432 with schema dictionary and 100 retries
 
@@ -63,7 +64,7 @@ services:
       - "8761:8761"
 
   dict:
-    image: lapierre/dictionary-service:0.0.10
+    image: lapierre/dictionary-service:0.0.11
     environment:
       - DICT_DATASOURCE_HOST=db:5432
       - DICT_DATASOURCE_PASSWORD=qwedsazxc
