@@ -5,7 +5,7 @@ import (
 	"dictionaries-service/util"
 	"fmt"
 	slog "github.com/go-eden/slf4go"
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 	"os"
 	"testing"
 )
@@ -56,11 +56,11 @@ func connectTestDb() *pg.DB {
 
 type dbLogger struct{}
 
-func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Context, error) {
+func (d dbLogger) BeforeQuery(c context.Context, _ *pg.QueryEvent) (context.Context, error) {
 	return c, nil
 }
 
-func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
+func (d dbLogger) AfterQuery(_ context.Context, q *pg.QueryEvent) error {
 	fmt.Print("go-pg: ")
 	fmt.Println(q.FormattedQuery())
 	return nil

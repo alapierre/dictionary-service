@@ -2,7 +2,7 @@ package util
 
 import (
 	"github.com/go-eden/slf4go"
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 )
 
 func FailOnError(err error, msg string) {

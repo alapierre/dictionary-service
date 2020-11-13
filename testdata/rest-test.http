@@ -1,0 +1,108 @@
+POST http://localhost:9098/api/metadata/AbsenceType
+X-Tenant: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "$id": "https://alapierre.io/dictionary.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DictionaryAbsenceType",
+  "type": "object",
+  "required": [ "onlyOnBeginOrEnd", "needDeliveryDateConfirmation", "needConfirmationDocumentNumber" ],
+  "properties": {
+    "onlyOnBeginOrEnd": {
+      "type": "boolean",
+      "description": "Absence can only start on beginning or finish on end of work day",
+      "default": false
+    },
+    "needDeliveryDateConfirmation": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is proof of absence delivery date required - should field be visible on form"
+    },
+    "needConfirmationDocumentNumber": {
+      "description": "Is absence confirmation document number needed",
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
+
+###
+
+POST http://localhost:9098/api/dictionary
+Content-Type: application/json
+X-Tenant: default
+Accept-Language: en-EN
+
+{
+  "children": [
+    {
+      "key": "uopdd",
+      "label": "Opieka rozliczana dziennie",
+      "name": "Child 1"
+    },
+    {
+      "key": "uopdh",
+      "label": "Opieka godzinowa",
+      "name": "Child 2"
+
+    }
+  ],
+  "key": "uopd",
+  "name": "Urlop Opieka nad dzieckiem",
+  "needConfirmationDocumentNumber": false,
+  "needDeliveryDateConfirmation": true,
+  "onlyOnBeginOrEnd": true,
+  "type": "AbsenceType"
+}
+
+###
+
+GET http://localhost:9098/api/dictionary/AbsenceType/uopd
+Content-Type: application/json
+X-Tenant: default
+Accept-Language: en-EN
+
+###
+
+PUT http://localhost:9098/api/dictionary
+Content-Type: application/json
+X-Tenant: default
+Accept-Language: en-EN
+
+{
+  "children": [
+    {
+      "key": "newCh1",
+      "label": "bbb",
+      "name": "Child 1 updated",
+      "type": "AbsenceType"
+    },
+    {
+      "key": "newCh3",
+      "label": "ttt",
+      "name": "Child 3 new",
+      "type": "AbsenceType"
+    }
+  ],
+  "key": "newP",
+  "name": "New parent updated",
+  "needConfirmationDocumentNumber": false,
+  "needDeliveryDateConfirmation": false,
+  "onlyOnBeginOrEnd": true,
+  "type": "AbsenceType"
+}
+
+
+###
+
+DELETE http://localhost:9098/api/dictionary/AbsenceType/k1
+X-Tenant: default
+
+
+###
+
+DELETE http://localhost:9098/api/dictionary/AbsenceType
+X-Tenant: default

@@ -23,4 +23,4 @@ push:
 
 run:
 	cd cmd/dictionary-service && go build -o /tmp/___go_build_main_go main.go
-	DICT_DATASOURCE_USER=$(DATASOURCE_USER) DICT_DATASOURCE_PASSWORD=$(DICT_DATASOURCE_PASSWORD) /tmp/___go_build_main_go
+	DICT_SHOW_SQL=true DICT_DATASOURCE_USER=$(DATASOURCE_USER) DICT_DATASOURCE_PASSWORD=$(DICT_DATASOURCE_PASSWORD) /tmp/___go_build_main_go
