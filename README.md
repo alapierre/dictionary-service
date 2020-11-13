@@ -372,11 +372,11 @@ Example result
     }
   }
 }
+```
 
 ### Update existing dictionary metadata
 
 ```
-###
 PUT http://localhost:9098/api/metadata/DictionaryAbsenceType
 X-Tenant: default
 Accept-Language: en-EN
