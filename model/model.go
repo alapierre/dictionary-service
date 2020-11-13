@@ -2,6 +2,11 @@
 //lint:file-ignore U1000 ignore unused code, it's generated
 package model
 
+import (
+	"database/sql"
+	"time"
+)
+
 //noinspection ALL
 type Dictionary struct {
 	tableName struct{} `pg:"dictionary,alias:p,discard_unknown_columns"`
@@ -33,6 +38,18 @@ type DictionaryMetadata struct {
 	Type    string `pg:"type,pk" json:"type"`
 	Tenant  string `pg:"tenant,pk,use_zero" json:"tenant"`
 	Content string `pg:"content" json:"content"`
+}
+
+type Configuration struct {
+	tableName struct{} `pg:"configuration,alias:c"`
+
+	Key      string         `pg:"key,pk" json:"key"`
+	Tenant   string         `pg:"tenant,pk" json:"tenant"`
+	Type     string         `json:"type"`
+	Name     string         `json:"name"`
+	Value    sql.NullString `json:"value"`
+	DateFrom time.Time      `pg:"date_from,pk" json:"date_from"`
+	DateTo   time.Time      `json:"date_to"`
 }
 
 // helper indirect model

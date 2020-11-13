@@ -76,6 +76,68 @@ volumes:
   pg_data:
 ```
 
+### Configuration entries store and load
+
+Every config parameter has own period of validity, eg. in January smtp.server.host was localhost, 
+but from next year it will have other value, and we want to set it now. So, we need two records in database:
+ 
+ | value     | date_form | date_to  |
+ |-----------|-----------|----------|
+ | 127.0.1.1 |2020-01-01 |2020-12-31|
+ | 34.0.11.1 |2021-01-01 |2999-12-31|
+
+#### Get one value for given key, tenant and day
+
+```
+GET http://localhost:9098/api/config/smtp.server.host/2020-01-01
+X-Tenant: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+```
+
+result:
+
+```json
+{
+  "key": "smtp.server.host",
+  "value": "127.0.0.1",
+  "type": "String"
+}
+```
+
+#### Get many keys, same tenant and day
+
+```
+GET http://localhost:9098/api/configs/2020-01-01?key=smtp.server.port&key=smtp.server.host
+X-Tenant: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+```
+
+result
+
+```json
+[
+  {
+    "key": "smtp.server.port",
+    "value": "25",
+    "type": "Int"
+  },
+  {
+    "key": "smtp.server.host",
+    "value": "127.0.0.1",
+    "type": "String"
+  }
+]
+```
+
+#### Store config values 
+
+not implemented yet - put your config into database
+
+
 ### Save new dictionary entry
 
 ```
