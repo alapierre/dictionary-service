@@ -10,7 +10,7 @@ create table dictionary
 	constraint dictionary_pk
 		primary key (key, type, tenant),
 	constraint dictionary_dictionary_key_type_fk
-		foreign key (parent_key, type, tenant) references public.dictionary
+		foreign key (parent_key, type, tenant) references dictionary
 			on delete cascade
 );
 
