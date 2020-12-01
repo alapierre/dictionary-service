@@ -106,3 +106,13 @@ X-Tenant: default
 
 DELETE http://localhost:9098/api/dictionary/AbsenceType
 X-Tenant: default
+
+###
+
+GET http://localhost:9098/api/metadata
+X-Tenant: default
+
+###
+
+GET http://localhost:9098/api/metadata/AbsenceType
+X-Tenant: default
