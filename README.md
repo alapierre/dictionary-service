@@ -1,6 +1,7 @@
 # dictionary-service
 
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=alapierre_dictionary-service&metric=alert_status)](https://sonarcloud.io/dashboard?id=alapierre_dictionary-service)
+[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 
 Fast and simple dictionary service on PostgreSQL database and JSON content
 
