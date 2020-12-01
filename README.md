@@ -18,7 +18,13 @@ Almost any system needs to store and manage flexible dictionary values. Some of 
 
 ## Current status
 
-In tests on production in several commertial projects. 
+In tests on production in several commercial projects. 
+
+## The Latest news
+
+- Translate dictionary name base on Accept-Language header
+- loading children for given parent, type and tenant
+- Configuration load (store and update - soon)
 
 ## Required environment variables
 
@@ -65,7 +71,7 @@ services:
       - "8761:8761"
 
   dict:
-    image: lapierre/dictionary-service:0.0.11
+    image: lapierre/dictionary-service:0.0.15
     environment:
       - DICT_DATASOURCE_HOST=db:5432
       - DICT_DATASOURCE_PASSWORD=qwedsazxc
@@ -188,14 +194,12 @@ Accept-Language: en-EN
     {
       "key": "newCh1",
       "label": "wwww",
-      "name": "Child 1",
-      "type": "AbsenceType"
+      "name": "Child 1"
     },
     {
       "key": "newCh2",
       "label": "qqqq",
-      "name": "Child 2",
-      "type": "AbsenceType"
+      "name": "Child 2"
     }
   ],
   "key": "HollidayLeave",
@@ -229,30 +233,27 @@ Result
     {
       "key": "newCh1",
       "label": "wwww",
-      "name": "Child 1",
-      "type": "AbsenceType"
+      "name": "Child 1"
     },
     {
       "key": "newCh2",
       "label": "qqqq",
-      "name": "Child 2",
-      "type": "AbsenceType"
+      "name": "Child 2"
     }
   ],
   "key": "HollidayLeave",
   "name": "Holliday Leave",
   "needConfirmationDocumentNumber": false,
   "needDeliveryDateConfirmation": true,
-  "onlyOnBeginOrEnd": true,
-  "tenant": "default",
+  "onlyOnBeginOrEnd": true,  
   "type": "AbsenceType"
 }
 ```
 
-#### Load child only dictionary entry
+#### Load children only 
 
 ```
-GET /api/dictionary/AbsenceType/HollidayLeave/newCh1
+GET /api/dictionary/AbsenceType/HollidayLeave/children
 X-Tenant: default
 Accept-Language: en-EN
 ```
@@ -260,14 +261,20 @@ Accept-Language: en-EN
 Result
 
 ```json
-{
-  "key": "newCh1",
-  "label": "wwww",
-  "name": "Child 1",
-  "parent_key": "newP",
-  "tenant": "default",
-  "type": "AbsenceType"
-}
+[
+    {
+          "key": "newCh1",
+          "label": "wwww",
+          "name": "Child 1",
+          "parent_key": "HollidayLeave"
+        },
+        {
+          "key": "newCh2",
+          "label": "qqqq",
+          "name": "Child 2",
+          "parent_key": "HollidayLeave"
+        }
+]
 ```
 
 ### Update existing dictionary entry
@@ -417,7 +424,5 @@ Empty body
 
 ### Next steps, coming soon
 
-- Translate dictionary name base on Accept-Language header
-- Configuration store, load and update
 - True unit tests
 - Integration tests

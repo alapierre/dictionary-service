@@ -65,12 +65,24 @@ func (s *DictionaryService) LoadTranslated(key, dictionaryType, tenant string, l
 	res := prepareMap(dict)
 
 	if dict.ParentKey == nil {
-		children, err := s.dictionaryRepository.LoadChildrenTranslated(key, dictionaryType, tenant, lang)
+		children, err := s.dictionaryRepository.LoadChildrenDictionaryTranslated(key, dictionaryType, tenant, lang)
 		if err != nil {
 			return nil, err
 		}
-		res["children"] = prepareChildrenMap(children)
+		res["children"] = prepareDictionaryChildrenMap(children, false)
 	}
+
+	return res, nil
+}
+
+func (s *DictionaryService) LoadChildrenTranslated(key, dictionaryType, tenant string, lang language.Tag) ([]childrenMap, error) {
+
+	children, err := s.dictionaryRepository.LoadChildrenDictionaryTranslated(key, dictionaryType, tenant, lang)
+	if err != nil {
+		return nil, err
+	}
+
+	res := prepareDictionaryChildrenMap(children, true)
 
 	return res, nil
 }
@@ -217,7 +229,6 @@ func prepareMap(dict *model.Dictionary) map[string]interface{} {
 
 	res["key"] = dict.Key
 	res["type"] = dict.Type
-	res["tenant"] = dict.Tenant
 	res["name"] = dict.Name
 
 	if dict.GroupId != nil {
@@ -242,8 +253,24 @@ func prepareChildrenMap(children []model.Dictionary) []childrenMap {
 		tmp["type"] = ch.Type
 		tmp["key"] = ch.Key
 		tmp["name"] = ch.Name
-		//tmp["tenant"] = ch.Tenant
 
+		mergeMaps(&ch.Content, &tmp)
+		list[i] = tmp
+	}
+	return list
+}
+
+func prepareDictionaryChildrenMap(children []model.ChildDictionary, withParentKey bool) []childrenMap {
+
+	list := make([]childrenMap, len(children))
+
+	for i, ch := range children {
+		tmp := make(map[string]interface{})
+		tmp["key"] = ch.Key
+		tmp["name"] = ch.Name
+		if withParentKey {
+			tmp["parent_key"] = ch.ParentKey
+		}
 		mergeMaps(&ch.Content, &tmp)
 		list[i] = tmp
 	}

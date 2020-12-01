@@ -142,6 +142,12 @@ func makeDictionariesEndpoints(dictionaryService *service.DictionaryService) *mu
 		transport.EncodeResponse,
 	))
 
+	r.Methods("GET").Path("/api/dictionary/{type}/{key}/children").Handler(httptransport.NewServer(
+		transport.MakeLoadDictChildrenEndpoint(dictionaryService),
+		transport.DecodeLoadDictRequest,
+		transport.EncodeResponse,
+	))
+
 	r.Methods("POST", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
 		transport.MakeSaveDictionaryEndpoint(dictionaryService),
 		transport.DecodeSaveDictRequest,
