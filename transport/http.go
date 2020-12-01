@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"time"
 )
 
 var DefaultLanguage language.Tag
@@ -61,6 +62,111 @@ type saveShallowDictionaryRequest struct {
 	GroupId   *string                `json:"group_id"`
 	Content   map[string]interface{} `json:"content"`
 	ParentKey *string                `json:"parent_key"`
+}
+
+type configurationArrayRequest struct {
+	Keys []string
+	Day  time.Time
+}
+
+func MakeLoadConfigurationArrayEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		tenant := extractTenant(ctx)
+		req := request.(configurationArrayRequest)
+
+		configs := configurationService.LoadMany(tenant, req.Day, req.Keys...)
+		var res []loadConfigurationResponse
+
+		var value *string
+
+		for _, t := range configs {
+
+			if t.Value.Valid {
+				tmp := t.Value.String // I need new copy of returned string
+				value = &tmp          // and than pointer to it
+			} else {
+				continue // skip null values in result
+			}
+
+			res = append(res, loadConfigurationResponse{
+				Key:   t.Key,
+				Value: value,
+				Type:  t.Type,
+			})
+		}
+
+		return res, nil
+	}
+}
+
+func DecodeLoadConfigurationArrayRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	vars := mux.Vars(r)
+	day, err := time.Parse("2006-01-02", vars["day"])
+
+	if err != nil {
+		return nil, err
+	}
+
+	return configurationArrayRequest{
+		Keys: r.URL.Query()["key"],
+		Day:  day,
+	}, nil
+}
+
+type configurationRequest struct {
+	Key string
+	Day time.Time
+}
+
+type loadConfigurationResponse struct {
+	Key   string  `json:"key"`
+	Value *string `json:"value"`
+	Type  string  `json:"type"`
+}
+
+func MakeLoadConfigurationEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		tenant := extractTenant(ctx)
+		req := request.(configurationRequest)
+
+		r, err := configurationService.LoadForDay(req.Key, tenant, req.Day)
+
+		if err != nil {
+			return makeRestError(err, "cant_load_configuration_by_key_tenant_and_day")
+		}
+
+		var value *string
+
+		if r.Value.Valid {
+			value = &r.Value.String
+		} else {
+			value = nil
+		}
+
+		return &loadConfigurationResponse{
+			Key:   r.Key,
+			Value: value,
+			Type:  r.Type,
+		}, nil
+	}
+}
+
+func DecodeLoadConfigurationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	vars := mux.Vars(r)
+	day, err := time.Parse("2006-01-02", vars["day"])
+
+	if err != nil {
+		return nil, err
+	}
+
+	return configurationRequest{
+		Key: vars["key"],
+		Day: day,
+	}, nil
 }
 
 func MakeLoadDictShallowEndpoint(service *service.DictionaryService) endpoint.Endpoint {
@@ -171,12 +277,6 @@ func DecodeLoadMetadataRequest(_ context.Context, r *http.Request) (interface{},
 	return metadataRequest{Type: dictionaryType}, nil
 }
 
-//func MakeTranslateDictionaryItemEndpoint(service *service.DictionaryService) endpoint.Endpoint {
-//	return func(ctx context.Context, request interface{}) (interface{}, error) {
-//
-//	}
-//}
-
 func MakeDeleteDictionaryByTypeEndpoint(service *service.DictionaryService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		tenant := extractTenant(ctx)
@@ -234,7 +334,7 @@ func MakeShallowSaveDictionaryEndpoint(service *service.DictionaryService) endpo
 	}
 }
 
-func DecodeShallowSaveDictionaryRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+func DecodeShallowSaveDictionaryRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request saveShallowDictionaryRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err

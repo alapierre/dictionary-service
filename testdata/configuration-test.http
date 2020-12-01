@@ -1,0 +1,21 @@
+GET http://localhost:9098/api/config/smtp.server.host/2020-01-01
+X-Tenant: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+
+###
+
+GET http://localhost:9098/api/configs/2020-01-01?key=smtp.server.port&key=smtp.server.host
+X-Tenant: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+
+###
+
+GET http://localhost:9098/api/configs/2020-01-01?key=a&key=smtp.server.host
+X-Tenant: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json

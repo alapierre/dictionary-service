@@ -29,7 +29,9 @@ func (s *dictionaryMetadataRepository) Load(dictionaryType, tenant string) (*mod
 		Type:   dictionaryType,
 		Tenant: tenant,
 	}
-	err := s.db.Model(metadata).Select()
+	err := s.db.Model(metadata).
+		WherePK().
+		Select()
 
 	return metadata, err
 }
@@ -56,7 +58,7 @@ func (s *dictionaryMetadataRepository) Delete(metadata *model.DictionaryMetadata
 func (s *dictionaryMetadataRepository) AvailableDictionaryTypes(tenant string) ([]string, error) {
 
 	var types []string
-	_, err := s.db.Query(&types, `select type from dictionary_metadata dictionary where tenant = ?`, tenant)
+	_, err := s.db.Query(&types, `select type from dictionary_metadata where tenant = ?`, tenant)
 
 	return types, err
 }

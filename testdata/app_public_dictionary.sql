@@ -1,3 +1,0 @@
-INSERT INTO dictionary (key, type, group_id, tenant, content, name, parent_key) VALUES ('uw', 'AbsenceType', null, '', '{"onlyOnBeginOrEnd": true, "needDeliveryDateConfirmation": true, "needConfirmationDocumentNumber": false}', 'Urlop wypoczynkowy', null);
-INSERT INTO dictionary (key, type, group_id, tenant, content, name, parent_key) VALUES ('uw1', 'AbsenceType', null, '', '{"label": "ala"}', 'urlop 1', 'uw');
-INSERT INTO dictionary (key, type, group_id, tenant, content, name, parent_key) VALUES ('uw2', 'AbsenceType', null, '', '{"label": "ola"}', 'urlop 2', 'uw');

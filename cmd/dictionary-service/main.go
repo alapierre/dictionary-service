@@ -59,7 +59,11 @@ func main() {
 	metadataRepository := service.NewDictionaryMetadataRepository(db)
 	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository, metadataRepository)
 
-	r := makeEndpoints(dictionaryService)
+	configurationRepository := service.NewConfigurationRepository(db)
+	configurationService := service.NewConfigurationService(configurationRepository)
+
+	r := makeDictionariesEndpoints(dictionaryService)
+	makeConfigurationEndpoints(r, configurationService)
 
 	http.Handle("/", r)
 	slog.Info("Started on port ", c.ServerPort)
@@ -77,7 +81,7 @@ func main() {
 	slog.Info("Bye.")
 }
 
-func makeEndpoints(dictionaryService *service.DictionaryService) *mux.Router {
+func makeDictionariesEndpoints(dictionaryService *service.DictionaryService) *mux.Router {
 
 	r := mux.NewRouter()
 	r.Use(addContext, accessControlMiddleware)
@@ -182,6 +186,21 @@ func makeEndpoints(dictionaryService *service.DictionaryService) *mux.Router {
 		transport.EncodeSavedResponse,
 	))
 	return r
+}
+
+func makeConfigurationEndpoints(r *mux.Router, configurationService service.ConfigurationService) {
+
+	r.Methods("GET").Path("/api/config/{key}/{day}").Handler(httptransport.NewServer(
+		transport.MakeLoadConfigurationEndpoint(configurationService),
+		transport.DecodeLoadConfigurationRequest,
+		transport.EncodeResponse,
+	))
+
+	r.Methods("GET").Path("/api/configs/{day}").Handler(httptransport.NewServer(
+		transport.MakeLoadConfigurationArrayEndpoint(configurationService),
+		transport.DecodeLoadConfigurationArrayRequest,
+		transport.EncodeResponse,
+	))
 }
 
 func startHttpAndWaitForSigINT(port int) {
