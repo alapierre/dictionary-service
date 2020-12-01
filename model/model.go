@@ -15,7 +15,7 @@ type Dictionary struct {
 	Type      string                 `pg:"type,pk" json:"type"`
 	Name      string                 `pg:"name" json:"name"`
 	GroupId   *string                `pg:"group_id" json:"group_id"`
-	Tenant    string                 `pg:"tenant,pk,use_zero" json:"tenant"`
+	Tenant    string                 `pg:"tenant,pk,use_zero" json:"-"`
 	Content   map[string]interface{} `pg:"content" json:"content"`
 	ParentKey *string                `pg:"parent_key" json:"parent_key"`
 }
@@ -59,7 +59,7 @@ type ParentDictionary struct {
 	Type     string                 `json:"type"`
 	Name     string                 `json:"name"`
 	GroupId  *string                `json:"group_id"`
-	Tenant   string                 `json:"tenant"`
+	Tenant   string                 `json:"-"`
 	Content  map[string]interface{} `json:"content"`
 	Children []ChildDictionary      `json:"children"`
 }

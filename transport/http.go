@@ -184,6 +184,22 @@ func MakeLoadDictShallowEndpoint(service *service.DictionaryService) endpoint.En
 	}
 }
 
+func MakeLoadDictChildrenEndpoint(service *service.DictionaryService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		tenant := extractTenant(ctx)
+		req := request.(dictionaryRequest)
+		lang := extractLang(service, ctx, req.Key, req.Type, tenant)
+
+		r, err := service.LoadChildrenTranslated(req.Key, req.Type, tenant, lang)
+
+		if err != nil {
+			return makeRestError(err, "cant_load_dictionary_by_key_and_type")
+		}
+		return r, nil
+	}
+}
+
 func MakeLoadDictionaryByType(service *service.DictionaryService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		tenant := extractTenant(ctx)

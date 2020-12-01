@@ -28,6 +28,7 @@ type DictionaryRepository interface {
 	DeleteAll(tenant string) error
 	LoadTranslated(key, dictionaryType, tenant string, lang language.Tag) (*model.Dictionary, error)
 	LoadChildrenTranslated(parentKey, dictionaryType, tenant string, lang language.Tag) ([]model.Dictionary, error)
+	LoadChildrenDictionaryTranslated(parentKey, dictionaryType, tenant string, lang language.Tag) ([]model.ChildDictionary, error)
 }
 
 type dictionaryRepository struct {
@@ -105,6 +106,27 @@ func (s *dictionaryRepository) LoadChildren(parentKey, dictionaryType, tenant st
 	return children, err
 }
 
+func (s *dictionaryRepository) LoadChildrenDictionaryTranslated(parentKey, dictionaryType, tenant string, lang language.Tag) ([]model.ChildDictionary, error) {
+
+	var children []model.ChildDictionary
+
+	res, err := s.LoadChildrenTranslated(parentKey, dictionaryType, tenant, lang)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range res {
+		children = append(children, model.ChildDictionary{
+			Key:       item.Key,
+			Name:      item.Name,
+			ParentKey: *item.ParentKey,
+			Content:   item.Content,
+		})
+	}
+	return children, nil
+}
+
 func (s *dictionaryRepository) LoadChildrenTranslated(parentKey, dictionaryType, tenant string, lang language.Tag) ([]model.Dictionary, error) {
 	var children []model.Dictionary
 
@@ -144,7 +166,7 @@ func (s *dictionaryRepository) LoadChildrenKeys(parentKey, dictionaryType, tenan
 func (s *dictionaryRepository) LoadByType(dictionaryType, tenant string) ([]model.Dictionary, error) {
 
 	var res []model.Dictionary
-	err := s.db.Model(&res).Where("type = ? and tenant = ?", dictionaryType, tenant).
+	err := s.db.Model(&res).Where("type = ? and tenant = ? and parent_key is null", dictionaryType, tenant).
 		Select()
 	return res, err
 }
