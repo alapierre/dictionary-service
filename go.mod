@@ -3,7 +3,7 @@ module dictionaries-service
 go 1.15
 
 require (
-	github.com/alapierre/gokit-utils v0.0.1
+	github.com/alapierre/gokit-utils v0.0.2
 	github.com/go-eden/slf4go v1.0.7
 	github.com/go-kit/kit v0.10.0
 	github.com/go-pg/migrations/v8 v8.0.1
