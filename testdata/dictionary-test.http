@@ -95,6 +95,13 @@ Accept-Language: en-EN
   "type": "AbsenceType"
 }
 
+###
+
+GET http://localhost:9098/api/dictionary/AbsenceType
+Content-Type: application/json
+X-Tenant: default
+Accept-Language: en-EN
+
 
 ###
 
