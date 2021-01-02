@@ -213,8 +213,25 @@ func (s *DictionaryService) updateChildren(parent *model.ParentDictionary) error
 	return nil
 }
 
-func (s *DictionaryService) LoadByType(dictionaryType string, tenant string) ([]model.Dictionary, error) {
-	return s.dictionaryRepository.LoadByType(dictionaryType, tenant)
+func (s *DictionaryService) LoadByType(dictionaryType string, tenant string) ([]map[string]interface{}, error) {
+
+	dict, err := s.dictionaryRepository.LoadByType(dictionaryType, tenant)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res []map[string]interface{}
+
+	for _, d := range dict {
+
+		if d.ParentKey == nil {
+			tmp := prepareMap(&d)
+			res = append(res, tmp)
+		}
+	}
+
+	return res, nil
 }
 
 func (s *DictionaryService) AvailableDictionaryTypes(tenant string) ([]string, error) {
