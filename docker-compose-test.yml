@@ -1,0 +1,12 @@
+version: '3.1'
+services:
+
+  dict:
+    image: lapierre/dictionary-service:${DICT_VERSION}
+    environment:
+      - DICT_DATASOURCE_HOST=db:5432
+      - DICT_DATASOURCE_PASSWORD=qwedsazxc
+      - DICT_DATASOURCE_USER=app
+      - DICT_EUREKA_SERVICE_URL=http://eureka:8761/eureka
+    ports:
+      - "9098:9098"

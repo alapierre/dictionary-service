@@ -43,6 +43,8 @@ func (s *dictionaryRepository) Load(key, dictionaryType, tenant string) (*model.
 
 	var dict model.Dictionary
 
+	s.db.Context()
+
 	_, err := s.db.QueryOne(&dict,
 		`select * from all_dictionaries where tenant = ? and key = ? and type = ?`, tenant, key, dictionaryType)
 

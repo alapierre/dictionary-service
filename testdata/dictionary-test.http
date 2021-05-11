@@ -1,5 +1,5 @@
 POST http://localhost:9098/api/metadata/AbsenceType
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Content-Type: application/json
@@ -33,7 +33,7 @@ Content-Type: application/json
 
 POST http://localhost:9098/api/dictionary
 Content-Type: application/json
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 
 {
@@ -62,14 +62,14 @@ Accept-Language: en-EN
 
 GET http://localhost:9098/api/dictionary/AbsenceType/uopd
 Content-Type: application/json
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 
 ###
 
 PUT http://localhost:9098/api/dictionary
 Content-Type: application/json
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 
 {
@@ -99,27 +99,37 @@ Accept-Language: en-EN
 
 GET http://localhost:9098/api/dictionary/AbsenceType
 Content-Type: application/json
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
 
+client.test("Response content-type is json", function() {
+  const type = response.contentType.mimeType;
+  client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+%}
 ###
 
 DELETE http://localhost:9098/api/dictionary/AbsenceType/k1
-X-Tenant: default
+X-Tenant-ID: default
 
 
 ###
 
 DELETE http://localhost:9098/api/dictionary/AbsenceType
-X-Tenant: default
+X-Tenant-ID: default
 
 ###
 
 GET http://localhost:9098/api/metadata
-X-Tenant: default
+X-Tenant-ID: default
 
 ###
 
 GET http://localhost:9098/api/metadata/AbsenceType
-X-Tenant: default
+X-Tenant-ID: default
