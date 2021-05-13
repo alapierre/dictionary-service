@@ -11,5 +11,5 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/text v0.3.4
+	golang.org/x/text v0.3.6
 )
