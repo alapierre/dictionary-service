@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"dictionaries-service/service"
-	"dictionaries-service/transport"
+	"dictionaries-service/tenant"
+	http2 "dictionaries-service/transport/http"
 	"dictionaries-service/util"
 	"flag"
 	"fmt"
@@ -34,6 +35,7 @@ type Config struct {
 	DefaultLanguage      string `split_words:"true" default:"en"`
 	InitDBConnectionRets int    `split_words:"true" default:"100"`
 	ShowSql              bool   `split_words:"true" default:"true"`
+	TenantHeaderName     string `split_words:"true" default:"X-Tenant-ID"`
 }
 
 var c Config
@@ -46,8 +48,11 @@ func main() {
 
 	slog.Infof("database name: %s host: %s user: %s", c.DatasourceName, c.DatasourceHost, c.DatasourceUser)
 
-	transport.DefaultLanguage = language.MustParse(c.DefaultLanguage)
-	slog.Info("Default language is ", transport.DefaultLanguage)
+	http2.DefaultLanguage = language.MustParse(c.DefaultLanguage)
+	slog.Info("Default language is ", http2.DefaultLanguage)
+
+	tenant.HeaderName(c.TenantHeaderName)
+	slog.Info("Tenant header is ", c.TenantHeaderName)
 
 	db := connectDb()
 	defer util.Close(db)
@@ -87,109 +92,109 @@ func makeDictionariesEndpoints(dictionaryService *service.DictionaryService) *mu
 	r.Use(addContext, accessControlMiddleware)
 
 	r.Methods("GET").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
-		transport.MakeLoadDictEndpoint(dictionaryService),
-		transport.DecodeLoadDictRequest,
-		transport.EncodeResponse,
+		http2.MakeLoadDictEndpoint(dictionaryService),
+		http2.DecodeLoadDictRequest,
+		http2.EncodeResponse,
 	))
 
 	r.Methods("GET").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		transport.MakeLoadMetadataEndpoint(dictionaryService),
-		transport.DecodeLoadMetadataRequest,
-		transport.EncodeMetadataResponse,
+		http2.MakeLoadMetadataEndpoint(dictionaryService),
+		http2.DecodeLoadMetadataRequest,
+		http2.EncodeMetadataResponse,
 	))
 
 	r.Methods("GET").Path("/api/metadata").Handler(httptransport.NewServer(
-		transport.MakeAvailableDictionaryTypesEndpoint(dictionaryService),
+		http2.MakeAvailableDictionaryTypesEndpoint(dictionaryService),
 		func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
 			return nil, nil
 		},
-		transport.EncodeResponse,
+		http2.EncodeResponse,
 	))
 
 	r.Methods("POST", "OPTIONS").Path("/api/metadata").Handler(httptransport.NewServer(
-		transport.MakeSaveMetadataEndpoint(dictionaryService),
-		transport.DecodeSaveMetadataRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeSaveMetadataEndpoint(dictionaryService),
+		http2.DecodeSaveMetadataRequest,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("POST", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		transport.MakeSaveMetadataEndpointBetter(dictionaryService),
-		transport.DecodeSaveMetadataRequestBetter,
-		transport.EncodeSavedResponse,
+		http2.MakeSaveMetadataEndpointBetter(dictionaryService),
+		http2.DecodeSaveMetadataRequestBetter,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("PUT", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		transport.MakeUpdateMetadataEndpointBetter(dictionaryService),
-		transport.DecodeSaveMetadataRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeUpdateMetadataEndpointBetter(dictionaryService),
+		http2.DecodeSaveMetadataRequest,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("PUT", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		transport.MakeSaveMetadataEndpointBetter(dictionaryService),
-		transport.DecodeSaveMetadataRequestBetter,
-		transport.EncodeSavedResponse,
+		http2.MakeSaveMetadataEndpointBetter(dictionaryService),
+		http2.DecodeSaveMetadataRequestBetter,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("GET").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
-		transport.MakeLoadDictionaryByType(dictionaryService),
-		transport.DecodeByTypeRequest,
-		transport.EncodeResponse,
+		http2.MakeLoadDictionaryByType(dictionaryService),
+		http2.DecodeByTypeRequest,
+		http2.EncodeResponse,
 	))
 
 	r.Methods("GET").Path("/api/dictionary/{type}/{key}/shallow").Handler(httptransport.NewServer(
-		transport.MakeLoadDictShallowEndpoint(dictionaryService),
-		transport.DecodeLoadDictRequest,
-		transport.EncodeResponse,
+		http2.MakeLoadDictShallowEndpoint(dictionaryService),
+		http2.DecodeLoadDictRequest,
+		http2.EncodeResponse,
 	))
 
 	r.Methods("GET").Path("/api/dictionary/{type}/{key}/children").Handler(httptransport.NewServer(
-		transport.MakeLoadDictChildrenEndpoint(dictionaryService),
-		transport.DecodeLoadDictRequest,
-		transport.EncodeResponse,
+		http2.MakeLoadDictChildrenEndpoint(dictionaryService),
+		http2.DecodeLoadDictRequest,
+		http2.EncodeResponse,
 	))
 
 	r.Methods("POST", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
-		transport.MakeSaveDictionaryEndpoint(dictionaryService),
-		transport.DecodeSaveDictRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeSaveDictionaryEndpoint(dictionaryService),
+		http2.DecodeSaveDictRequest,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("PUT", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
-		transport.MakeUpdateDictionaryEndpoint(dictionaryService),
-		transport.DecodeSaveDictRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeUpdateDictionaryEndpoint(dictionaryService),
+		http2.DecodeSaveDictRequest,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("POST", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
-		transport.MakeShallowSaveDictionaryEndpoint(dictionaryService),
-		transport.DecodeShallowSaveDictionaryRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeShallowSaveDictionaryEndpoint(dictionaryService),
+		http2.DecodeShallowSaveDictionaryRequest,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("PUT", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
-		transport.MakeShallowUpdateDictionaryEndpoint(dictionaryService),
-		transport.DecodeShallowSaveDictionaryRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeShallowUpdateDictionaryEndpoint(dictionaryService),
+		http2.DecodeShallowSaveDictionaryRequest,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("DELETE", "OPTIONS").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
-		transport.MakeDeleteDictionaryEndpoint(dictionaryService),
-		transport.DecodeLoadDictRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeDeleteDictionaryEndpoint(dictionaryService),
+		http2.DecodeLoadDictRequest,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("DELETE").Path("/api/dictionary/all").Handler(httptransport.NewServer(
-		transport.MakeDeleteAllDictionaryEndpoint(dictionaryService),
+		http2.MakeDeleteAllDictionaryEndpoint(dictionaryService),
 		func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
 			return nil, nil
 		},
-		transport.EncodeSavedResponse,
+		http2.EncodeSavedResponse,
 	))
 
 	r.Methods("DELETE").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
-		transport.MakeDeleteDictionaryByTypeEndpoint(dictionaryService),
-		transport.DecodeByTypeRequest,
-		transport.EncodeSavedResponse,
+		http2.MakeDeleteDictionaryByTypeEndpoint(dictionaryService),
+		http2.DecodeByTypeRequest,
+		http2.EncodeSavedResponse,
 	))
 	return r
 }
@@ -197,15 +202,15 @@ func makeDictionariesEndpoints(dictionaryService *service.DictionaryService) *mu
 func makeConfigurationEndpoints(r *mux.Router, configurationService service.ConfigurationService) {
 
 	r.Methods("GET").Path("/api/config/{key}/{day}").Handler(httptransport.NewServer(
-		transport.MakeLoadConfigurationEndpoint(configurationService),
-		transport.DecodeLoadConfigurationRequest,
-		transport.EncodeResponse,
+		http2.MakeLoadConfigurationEndpoint(configurationService),
+		http2.DecodeLoadConfigurationRequest,
+		http2.EncodeResponse,
 	))
 
 	r.Methods("GET").Path("/api/configs/{day}").Handler(httptransport.NewServer(
-		transport.MakeLoadConfigurationArrayEndpoint(configurationService),
-		transport.DecodeLoadConfigurationArrayRequest,
-		transport.EncodeResponse,
+		http2.MakeLoadConfigurationArrayEndpoint(configurationService),
+		http2.DecodeLoadConfigurationArrayRequest,
+		http2.EncodeResponse,
 	))
 }
 
@@ -310,10 +315,8 @@ func migrate(db *pg.DB) {
 
 func addContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		ctx := context.WithValue(r.Context(), "tenant", "")
+		ctx := tenant.NewContext(r.Context(), tenant.FromRequest(r))
 		ctx = context.WithValue(ctx, "language", r.Header.Get("Accept-Language"))
-
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

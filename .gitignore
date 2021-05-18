@@ -87,3 +87,4 @@ fabric.properties
 
 /dictionaries-service.iml
 /cmd/dictionary-service/dictionary-service
+/testdata/http-client.private.env.json

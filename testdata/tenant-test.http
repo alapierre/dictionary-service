@@ -1,0 +1,200 @@
+POST http://localhost:9098/api/metadata/Country
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "$id": "https://alapierre.io/dictionary.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DictionaryCountries",
+  "type": "object",
+  "required": [ "bigCity" ],
+  "properties": {
+    "bigCity": {
+      "type": "boolean",
+      "description": "Cities bigger than others",
+      "default": false
+    }
+  }
+}
+
+###
+
+POST http://localhost:9098/api/dictionary
+Content-Type: application/json
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+
+{
+  "key": "PL",
+  "name": "Poland",
+  "type": "Country",
+  "children": [
+    {
+      "key": "PL_WAR",
+      "label": "Capitol",
+      "name": "Warsaw"
+    }
+  ]
+}
+
+###
+
+GET http://localhost:9098/api/dictionary/Country/PL
+Content-Type: application/json
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+
+> {%
+client.test("Request should return proper data created in previews test", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("kay should be proper", function () {
+
+    client.assert(response.body.hasOwnProperty("key"))
+
+    var o = response.body.valueOf()
+    client.assert(o.key === "PL")
+    client.assert(o.type === "Country")
+
+});
+%}
+
+###
+
+# should fail
+GET http://localhost:9098/api/dictionary/Country/PL
+Content-Type: application/json
+X-Tenant-ID: default
+Accept-Language: en-EN
+
+> {%
+client.test("Request should failed, because wrong tenant id", function() {
+    client.log(response.body.length)
+    var statusCode = response.status;
+    client.assert(statusCode === 400, "Expected response status 400 but but received '" + statusCode + "'");
+});
+%}
+
+###
+
+GET http://localhost:9098/api/dictionary/Country/PL_WAR
+Content-Type: application/json
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+
+> {%
+client.test("Request should return proper data created in previews test", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("kay should be proper", function () {
+
+    client.assert(response.body.hasOwnProperty("key"))
+
+    var o = response.body.valueOf()
+    client.assert(o.key === "PL_WAR")
+    client.assert(o.type === "Country")
+    client.assert(o.parent_key === "PL")
+
+});
+%}
+
+###
+
+GET http://localhost:9098/api/metadata
+X-Tenant-ID: tenant1
+
+> {%
+client.test("Request should return proper data created in previews test", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("should be only one element", function () {
+    var o = response.body.valueOf()
+    client.assert(o.length === 1);
+});
+%}
+
+###
+
+PUT http://localhost:9098/api/dictionary
+Content-Type: application/json
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+
+{
+  "key": "PL",
+  "name": "Poland",
+  "type": "Country",
+  "bigCity": true,
+  "children": [
+    {
+      "key": "PL_WAR",
+      "label": "Capitol",
+      "name": "Warsaw"
+    }
+  ]
+}
+
+###
+
+GET http://localhost:9098/api/dictionary/Country/PL
+Content-Type: application/json
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+
+> {%
+client.test("Request should return proper data created in previews test", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("bigCity value should be changed", function () {
+
+    client.assert(response.body.hasOwnProperty("key"))
+
+    var o = response.body.valueOf()
+    client.assert(o.key === "PL")
+    client.assert(o.type === "Country")
+    client.assert(o.bigCity === true)
+
+});
+%}
+
+###
+
+# dla niepoprawnego klucza powinen być zgłaszany błąd
+DELETE http://localhost:9098/api/dictionary/Country
+X-Tenant-ID: tenant1
+
+###
