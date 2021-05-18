@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+    <module name="dictionary-service" />
+    <working_directory value="$PROJECT_DIR$" />
+    <envs>
+      <env name="DICT_CONNECTION_STRING" value="postgres://app:qwedsazxc@localhost:5432/app?sslmode=disable" />
+      <env name="DICT_DATASOURCE_USER" value="app" />
+      <env name="DICT_DATASOURCE_PASSWORD" value="qwedsazxc" />
+    </envs>
+    <kind value="FILE" />
+    <package value="dictionaries-service" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/cmd/dictionary-service/main.go" />
+    <method v="2" />
+  </configuration>
+</component>

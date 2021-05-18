@@ -71,7 +71,7 @@ services:
       - "8761:8761"
 
   dict:
-    image: lapierre/dictionary-service:0.0.15
+    image: lapierre/dictionary-service
     environment:
       - DICT_DATASOURCE_HOST=db:5432
       - DICT_DATASOURCE_PASSWORD=qwedsazxc
