@@ -7,7 +7,7 @@ import (
 type DictionaryCalendar struct {
 	tableName struct{} `pg:"dictionary.calendar,alias:c,discard_unknown_columns"`
 
-	Day    time.Time         `pg:"day,pk"`
+	Day    time.Time         `pg:"day,pk" `
 	Tenant string            `pg:"tenant,pk"`
 	Name   *string           `pg:"name"`
 	Type   string            `pg:"type,use_zero"`

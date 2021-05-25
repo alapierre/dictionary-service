@@ -12,7 +12,6 @@ import (
 	"golang.org/x/text/language"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 )
 
 var DefaultLanguage language.Tag
@@ -58,12 +57,12 @@ func MakeLoadDictShallowEndpoint(service *service.DictionaryService) endpoint.En
 			r, err := service.LoadShallow(req.Key, req.Type, t.Name)
 
 			if err != nil {
-				return makeRestError(err, "cant_load_dictionary_by_key_and_type")
+				return MakeRestError(err, "cant_load_dictionary_by_key_and_type")
 			}
 			return r, nil
 
 		} else {
-			return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+			return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 		}
 	}
 }
@@ -78,11 +77,11 @@ func MakeLoadDictChildrenEndpoint(service *service.DictionaryService) endpoint.E
 			r, err := service.LoadChildrenTranslated(req.Key, req.Type, t.Name, lang)
 
 			if err != nil {
-				return makeRestError(err, "cant_load_dictionary_by_key_and_type")
+				return MakeRestError(err, "cant_load_dictionary_by_key_and_type")
 			}
 			return r, nil
 		} else {
-			return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+			return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 		}
 	}
 }
@@ -95,7 +94,7 @@ func MakeLoadDictionaryByType(service *service.DictionaryService) endpoint.Endpo
 			res, err := service.LoadByType(req.Type, t.Name)
 			return res, err
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -105,7 +104,7 @@ func MakeAvailableDictionaryTypesEndpoint(service *service.DictionaryService) en
 			types, err := service.AvailableDictionaryTypes(t.Name)
 			return types, err
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -115,7 +114,7 @@ func MakeDeleteDictionaryByTypeEndpoint(service *service.DictionaryService) endp
 			req := request.(byTypeRequest)
 			return nil, service.DeleteByType(req.Type, t.Name)
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -130,7 +129,7 @@ func MakeDeleteAllDictionaryEndpoint(service *service.DictionaryService) endpoin
 		if t, ok := tenant.FromContext(ctx); ok {
 			return nil, service.DeleteAll(t.Name)
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -140,7 +139,7 @@ func MakeDeleteDictionaryEndpoint(service *service.DictionaryService) endpoint.E
 			req := request.(dictionaryRequest)
 			return nil, service.Delete(req.Key, req.Type, t.Name)
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -152,11 +151,11 @@ func MakeShallowUpdateDictionaryEndpoint(service *service.DictionaryService) end
 			err := service.UpdateShallow(shallowDictionaryToDictionary(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_create_new_dictionary_entry")
+				return MakeRestError(err, "cant_create_new_dictionary_entry")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -168,11 +167,11 @@ func MakeShallowSaveDictionaryEndpoint(service *service.DictionaryService) endpo
 			err := service.SaveShallow(shallowDictionaryToDictionary(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_create_new_dictionary_entry")
+				return MakeRestError(err, "cant_create_new_dictionary_entry")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -191,11 +190,11 @@ func MakeSaveDictionaryEndpoint(service *service.DictionaryService) endpoint.End
 			err := service.SaveParent(convertRequestToDictionary(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_create_new_dictionary_entry")
+				return MakeRestError(err, "cant_create_new_dictionary_entry")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -206,11 +205,11 @@ func MakeUpdateDictionaryEndpoint(service *service.DictionaryService) endpoint.E
 			err := service.UpdateParent(convertRequestToDictionary(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_update_dictionary_entry_by_key_and_type")
+				return MakeRestError(err, "cant_update_dictionary_entry_by_key_and_type")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -222,11 +221,11 @@ func MakeLoadDictEndpoint(service *service.DictionaryService) endpoint.Endpoint 
 			r, err := service.LoadTranslated(req.Key, req.Type, t.Name, lang)
 
 			if err != nil {
-				return makeRestError(err, "cant_load_dictionary_by_key_and_type")
+				return MakeRestError(err, "cant_load_dictionary_by_key_and_type")
 			}
 			return r, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -264,50 +263,6 @@ func DecodeLoadDictRequest(_ context.Context, r *http.Request) (interface{}, err
 	key := vars["key"]
 	dictionaryType := vars["type"]
 	return dictionaryRequest{Key: key, Type: dictionaryType}, nil
-}
-
-func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	headers := w.Header()
-	headers.Set("Content-Type", "application/json; charset=utf-8")
-	headers.Set("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
-	headers.Set("X-Content-Type-Options", "nosniff")
-	headers.Set("X-XSS-Protection", "1; mode=block")
-	headers.Set("Pragma", "no-cache")
-	headers.Set("Expires", "0")
-	headers.Set("X-Frame-Options", "DENY")
-
-	if _, err := response.(*RestError); err {
-		w.WriteHeader(http.StatusBadRequest)
-	}
-
-	if reflect.ValueOf(response).IsNil() {
-		rt := reflect.TypeOf(response)
-		switch rt.Kind() {
-		case reflect.Slice, reflect.Array:
-			return json.NewEncoder(w).Encode(make([]int, 0))
-		}
-	}
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-func EncodeSavedResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	headers := w.Header()
-	headers.Set("Content-Type", "application/json; charset=utf-8")
-	headers.Set("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
-	headers.Set("X-Content-Type-Options", "nosniff")
-	headers.Set("X-XSS-Protection", "1; mode=block")
-	headers.Set("Pragma", "no-cache")
-	headers.Set("Expires", "0")
-	headers.Set("X-Frame-Options", "DENY")
-
-	if _, err := response.(*RestError); err {
-		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.WriteHeader(http.StatusNoContent)
-	}
-
-	return json.NewEncoder(w).Encode(response)
 }
 
 func shallowDictionaryToDictionary(req saveShallowDictionaryRequest, tenant string) *model.Dictionary {

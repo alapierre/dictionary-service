@@ -39,7 +39,7 @@ func MakeLoadMetadataEndpoint(service *service.DictionaryService) endpoint.Endpo
 			}
 			return res.Content, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -49,11 +49,11 @@ func MakeSaveMetadataEndpoint(service *service.DictionaryService) endpoint.Endpo
 			req := request.(saveMetadataRequest)
 			err := service.SaveMetadata(metadataRequestToDictionaryMetadata(req, t.Name))
 			if err != nil {
-				return makeRestError(err, "cant_create_new_dictionary_metadata")
+				return MakeRestError(err, "cant_create_new_dictionary_metadata")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -65,11 +65,11 @@ func MakeSaveMetadataEndpointBetter(service *service.DictionaryService) endpoint
 			err := service.SaveMetadata(metadataRequestToDictionaryMetadataBetter(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_create_new_dictionary_metadata")
+				return MakeRestError(err, "cant_create_new_dictionary_metadata")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -82,11 +82,11 @@ func MakeUpdateMetadataEndpointBetter(service *service.DictionaryService) endpoi
 			err := service.UpdateMetadata(metadataRequestToDictionaryMetadataBetter(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_update_dictionary_metadata")
+				return MakeRestError(err, "cant_update_dictionary_metadata")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
