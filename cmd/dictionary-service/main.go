@@ -51,7 +51,7 @@ func main() {
 	http2.DefaultLanguage = language.MustParse(c.DefaultLanguage)
 	slog.Info("Default language is ", http2.DefaultLanguage)
 
-	tenant.HeaderName(c.TenantHeaderName)
+	tenant.HeaderName(c.TenantHeaderName, "X-Tenant-Merge-Default")
 	slog.Info("Tenant header is ", c.TenantHeaderName)
 
 	db := connectDb()

@@ -26,7 +26,7 @@ func MakeLoadConfigurationArrayEndpoint(configurationService service.Configurati
 
 		req := request.(configurationArrayRequest)
 
-		configs := configurationService.LoadMany(t, req.Day, req.Keys...)
+		configs := configurationService.LoadMany(t.Name, req.Day, req.Keys...)
 		var res []loadConfigurationResponse
 
 		var value *string
@@ -87,7 +87,7 @@ func MakeLoadConfigurationEndpoint(configurationService service.ConfigurationSer
 
 		req := request.(configurationRequest)
 
-		r, err := configurationService.LoadForDay(req.Key, t, req.Day)
+		r, err := configurationService.LoadForDay(req.Key, t.Name, req.Day)
 
 		if err != nil {
 			return makeRestError(err, "cant_load_configuration_by_key_tenant_and_day")

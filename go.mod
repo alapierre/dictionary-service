@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/alapierre/gokit-utils v0.0.2
+	github.com/dizzyfool/genna v1.1.5 // indirect
 	github.com/go-eden/slf4go v1.0.9
 	github.com/go-kit/kit v0.10.0
 	github.com/go-pg/migrations/v8 v8.1.0
