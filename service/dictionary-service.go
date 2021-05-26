@@ -122,12 +122,12 @@ func (s *DictionaryService) UpdateParent(parent *model.ParentDictionary) error {
 	})
 }
 
-// jeśli parametrem jest parent, zapisuje jeden poziom słownika. bez wpływu na dzieci
+// SaveShallow jeśli parametrem jest parent, zapisuje jeden poziom słownika. bez wpływu na dzieci
 func (s *DictionaryService) SaveShallow(dict *model.Dictionary) error {
 	return s.dictionaryRepository.Save(dict)
 }
 
-// jeśli parametrem jest parent, aktualizuje jeden poziom słownika. bez wpływu na dzieci
+// UpdateShallow jeśli parametrem jest parent, aktualizuje jeden poziom słownika. bez wpływu na dzieci
 func (s *DictionaryService) UpdateShallow(dict *model.Dictionary) error {
 	return s.dictionaryRepository.Update(dict)
 }

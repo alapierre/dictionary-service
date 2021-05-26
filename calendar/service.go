@@ -17,6 +17,48 @@ type service struct {
 
 type Service interface {
 	LoadByTypeAndRange(ctx context.Context, calendarType string, from, to time.Time) ([]DictionaryCalendar, error)
+	Save(ctx context.Context, calendar *SaveDto) error
+	Update(ctx context.Context, calendar *SaveDto) error
+	Delete(ctx context.Context, calendarType string, day time.Time) error
+}
+
+func (s *service) Save(ctx context.Context, calendar *SaveDto) error {
+
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("can't read tenant from context")
+	}
+
+	return s.repository.Save(mapCalendar(calendar, t))
+}
+
+func (s *service) Update(ctx context.Context, calendar *SaveDto) error {
+
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("can't read tenant from context")
+	}
+
+	return s.repository.Update(mapCalendar(calendar, t))
+}
+
+func mapCalendar(calendar *SaveDto, t tenant.Tenant) *DictionaryCalendar {
+	return &DictionaryCalendar{
+		Day:    calendar.Day,
+		Tenant: t.Name,
+		Name:   &calendar.Name,
+		Type:   calendar.CalendarType,
+		Kind:   calendar.Kind,
+		Labels: calendar.Labels,
+	}
+}
+
+func (s *service) Delete(ctx context.Context, calendarType string, day time.Time) error {
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("can't read tenant from context")
+	}
+	return s.repository.Delete(t.Name, calendarType, day)
 }
 
 func (s *service) LoadByTypeAndRange(ctx context.Context, calendarType string, from, to time.Time) ([]DictionaryCalendar, error) {
