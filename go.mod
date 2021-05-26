@@ -4,13 +4,13 @@ go 1.15
 
 require (
 	github.com/alapierre/gokit-utils v0.0.2
-	github.com/dizzyfool/genna v1.1.5 // indirect
 	github.com/go-eden/slf4go v1.0.9
 	github.com/go-kit/kit v0.10.0
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.7.3
+	github.com/go-pg/pg/v10 v10.9.3
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/text v0.3.6
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
