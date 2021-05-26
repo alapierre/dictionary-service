@@ -19,7 +19,7 @@ Almost any system needs to store and manage flexible dictionary values. Some of 
 
 ## Current status
 
-In on production in several commercial projects. 
+In production in several commercial projects. 
 
 ## The Latest news
 
