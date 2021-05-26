@@ -18,7 +18,7 @@ type calendarRequest struct {
 
 type calendarResponse struct {
 	Day    string            `json:"day"`
-	Tenant string            `json:"tenant"`
+	Tenant string            `json:"tenant,omitempty"`
 	Name   *string           `json:"name"`
 	Kind   *string           `json:"kind,omitempty"`
 	Labels map[string]string `json:"labels,omitempty"`
