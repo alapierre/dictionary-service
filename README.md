@@ -10,21 +10,21 @@ Fast and simple dictionary service on PostgreSQL database and JSON content
 Almost any system needs to store and manage flexible dictionary values. Some of these need variable over time configuration. 
 
 - provide fast REST microservice for storing dictionary in JSON format 
-- store configuration values changeable over time (eg. what will be configuration value of X in 2025-12-31?)
 - dictionaries should be describable - for automatic GUI build
 - i18n support for dictionary names
+- store configuration values changeable over time (e.g. what will be configuration value of X in 2025-12-31?)
+- store calendar like dictionaries (the dictionary key is a date) e.g. holiday calendar
 - integrate with Netflix Eureka and oAtuh
 - no additional, other than PostgreSQL database, for store dictionaries and configuration data - in cloud operators noSQL database is additional cost
 
 ## Current status
 
-In tests on production in several commercial projects. 
+In on production in several commercial projects. 
 
 ## The Latest news
 
-- Translate dictionary name base on Accept-Language header
-- loading children for given parent, type and tenant
 - Configuration load (store and update - soon)
+- Calendar dictionary load (store and update - soon)
 
 ## Required environment variables
 
@@ -83,6 +83,126 @@ services:
 volumes:
   pg_data:
 ```
+
+### Calendar dictionaries
+
+When we need store e.g. list of free days like holiday calendar, the best suitable will be dictionary with date as a key 
+and possibility to get all entries in date range. Then we can get all holidays e.g. in 2021 year. 
+Some time we need extra information about free day, e.g. to count salary components for work on a holiday.
+This is the reason why the calendar API was created.
+
+Because in many cases we have common holiday calendar for more than one tenant (application, module) it is possible to 
+use default tenant as a base calendar and override it in specific tenant if needed. 
+
+In database:
+
+| tenant     | type     | name         | kind           | labels                            | day        |
+|------------|----------|--------------|----------------|-----------------------------------|------------|
+|            | holidays | Nowy Rok     | public holiday | "holliday_type"=>"country"        | 2021-01-01 |
+|            | holidays | Trzech Króli | public holiday | "holliday_type"=>"church holiday" | 2021-01-06 | 
+| tenant1    | holidays | Barburka     | company holiday| "holliday_type"=>"company day"    | 2021-12-04 |
+
+Load from default tenant (or without tenant at all - no `X-Tenant-ID` header):
+
+````
+GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
+Content-Type: application/json
+X-Tenant-ID: default
+Accept-Language: en-EN
+````
+
+result
+
+````json
+[
+  {
+    "day": "2021-01-01",
+    "tenant": "",
+    "name": "Nowy Rok",
+    "kind": "public holiday",
+    "labels": {
+      "holliday_type": "country"
+    }
+  },
+  {
+    "day": "2021-01-06",
+    "tenant": "",
+    "name": "Trzech Króli",
+    "kind": "public holiday",
+    "labels": {
+       "holliday_type": "church holiday"
+    }
+  }
+]
+````
+
+Load from tenant1:
+
+````
+GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
+Content-Type: application/json
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+````
+
+````json
+[
+  {
+    "day": "2021-12-04",
+    "tenant": "tenant1",
+    "name": "Barburka",
+    "kind": "company holiday",
+    "labels": {
+       "holliday_type": "company day"
+    }
+  }
+]
+````
+
+If in request header we put `X-Tenant-Merge-Default` with true value:
+
+````
+GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
+Content-Type: application/json
+X-Tenant-ID: tenant1
+X-Tenant-Merge-Default: true
+Accept-Language: en-EN
+````
+
+we will get:
+
+````json
+[
+  {
+    "day": "2021-01-01",
+    "tenant": "",
+    "name": "Nowy Rok",
+    "kind": "public holiday",
+    "labels": {
+      "holliday_type": "country"
+    }
+  },
+  {
+    "day": "2021-01-06",
+    "tenant": "",
+    "name": "Trzech Króli",
+    "kind": "public holiday",
+    "labels": {
+       "holliday_type": "church holiday"
+    }
+  },
+ {
+  "day": "2021-12-04",
+  "tenant": "tenant1",
+  "name": "Barburka",
+  "kind": "company holiday",
+  "labels": {
+      "holliday_type": "company day"
+  }
+ }
+]
+````
+
 
 ### Configuration entries store and load
 
