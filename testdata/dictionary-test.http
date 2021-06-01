@@ -133,3 +133,8 @@ X-Tenant-ID: default
 
 GET http://localhost:9098/api/metadata/AbsenceType
 X-Tenant-ID: default
+
+###
+
+DELETE http://localhost:9098/api/metadata/AbsenceType
+X-Tenant-ID: default
