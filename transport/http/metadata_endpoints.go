@@ -33,13 +33,13 @@ func MakeLoadMetadataEndpoint(service *service.DictionaryService) endpoint.Endpo
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		if t, ok := tenant.FromContext(ctx); ok {
 			req := request.(metadataRequest)
-			res, err := service.LoadMetadata(req.Type, t)
+			res, err := service.LoadMetadata(req.Type, t.Name)
 			if err != nil {
 				return nil, err
 			}
 			return res.Content, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -47,13 +47,13 @@ func MakeSaveMetadataEndpoint(service *service.DictionaryService) endpoint.Endpo
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		if t, ok := tenant.FromContext(ctx); ok {
 			req := request.(saveMetadataRequest)
-			err := service.SaveMetadata(metadataRequestToDictionaryMetadata(req, t))
+			err := service.SaveMetadata(metadataRequestToDictionaryMetadata(req, t.Name))
 			if err != nil {
-				return makeRestError(err, "cant_create_new_dictionary_metadata")
+				return MakeRestError(err, "cant_create_new_dictionary_metadata")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -62,14 +62,14 @@ func MakeSaveMetadataEndpointBetter(service *service.DictionaryService) endpoint
 		if t, ok := tenant.FromContext(ctx); ok {
 			req := request.(saveMetadataRequestBetter)
 
-			err := service.SaveMetadata(metadataRequestToDictionaryMetadataBetter(req, t))
+			err := service.SaveMetadata(metadataRequestToDictionaryMetadataBetter(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_create_new_dictionary_metadata")
+				return MakeRestError(err, "cant_create_new_dictionary_metadata")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 
@@ -79,14 +79,14 @@ func MakeUpdateMetadataEndpointBetter(service *service.DictionaryService) endpoi
 			req := request.(saveMetadataRequestBetter)
 			slog.Info("Trying to save: req: ", request)
 
-			err := service.UpdateMetadata(metadataRequestToDictionaryMetadataBetter(req, t))
+			err := service.UpdateMetadata(metadataRequestToDictionaryMetadataBetter(req, t.Name))
 
 			if err != nil {
-				return makeRestError(err, "cant_update_dictionary_metadata")
+				return MakeRestError(err, "cant_update_dictionary_metadata")
 			}
 			return nil, nil
 		}
-		return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 	}
 }
 

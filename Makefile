@@ -8,7 +8,7 @@ DATASOURCE_USER=app
 DICT_DATASOURCE_PASSWORD=qwedsazxc
 
 modelgen:
-	genna model -c $(CONNECTION_STRING) -o model/model.go -k -g 9
+	genna model -c $(CONNECTION_STRING) -t dictionary.calendar_type,dictionary.calendar -o model/calendar.go -k
 
 build:
 	cd cmd/dictionary-service && CGO_ENABLED=0 go build -a -installsuffix cgo -o dictionary-service .
