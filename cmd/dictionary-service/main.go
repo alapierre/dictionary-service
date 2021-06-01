@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"dictionaries-service/calendar"
-	crest "dictionaries-service/calendar/transport/http"
 	"dictionaries-service/service"
 	"dictionaries-service/tenant"
 	rest "dictionaries-service/transport/http"
@@ -12,7 +11,6 @@ import (
 	"fmt"
 	"github.com/alapierre/gokit-utils/eureka"
 	slog "github.com/go-eden/slf4go"
-	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/go-pg/migrations/v8"
 	"github.com/go-pg/pg/v10"
 	"github.com/gorilla/mux"
@@ -92,138 +90,6 @@ func main() {
 	startHttpAndWaitForSigINT(c.ServerPort)
 
 	slog.Info("Bye.")
-}
-
-func makeDictionariesEndpoints(r *mux.Router, dictionaryService *service.DictionaryService) {
-
-	r.Methods("GET").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
-		rest.MakeLoadDictEndpoint(dictionaryService),
-		rest.DecodeLoadDictRequest,
-		rest.EncodeResponse,
-	))
-
-	r.Methods("GET").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		rest.MakeLoadMetadataEndpoint(dictionaryService),
-		rest.DecodeLoadMetadataRequest,
-		rest.EncodeMetadataResponse,
-	))
-
-	r.Methods("GET").Path("/api/metadata").Handler(httptransport.NewServer(
-		rest.MakeAvailableDictionaryTypesEndpoint(dictionaryService),
-		func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
-			return nil, nil
-		},
-		rest.EncodeResponse,
-	))
-
-	r.Methods("POST", "OPTIONS").Path("/api/metadata").Handler(httptransport.NewServer(
-		rest.MakeSaveMetadataEndpoint(dictionaryService),
-		rest.DecodeSaveMetadataRequest,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("POST", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		rest.MakeSaveMetadataEndpointBetter(dictionaryService),
-		rest.DecodeSaveMetadataRequestBetter,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("PUT", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		rest.MakeUpdateMetadataEndpointBetter(dictionaryService),
-		rest.DecodeSaveMetadataRequest,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("PUT", "OPTIONS").Path("/api/metadata/{type}").Handler(httptransport.NewServer(
-		rest.MakeSaveMetadataEndpointBetter(dictionaryService),
-		rest.DecodeSaveMetadataRequestBetter,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("GET").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
-		rest.MakeLoadDictionaryByType(dictionaryService),
-		rest.DecodeByTypeRequest,
-		rest.EncodeResponse,
-	))
-
-	r.Methods("GET").Path("/api/dictionary/{type}/{key}/shallow").Handler(httptransport.NewServer(
-		rest.MakeLoadDictShallowEndpoint(dictionaryService),
-		rest.DecodeLoadDictRequest,
-		rest.EncodeResponse,
-	))
-
-	r.Methods("GET").Path("/api/dictionary/{type}/{key}/children").Handler(httptransport.NewServer(
-		rest.MakeLoadDictChildrenEndpoint(dictionaryService),
-		rest.DecodeLoadDictRequest,
-		rest.EncodeResponse,
-	))
-
-	r.Methods("POST", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
-		rest.MakeSaveDictionaryEndpoint(dictionaryService),
-		rest.DecodeSaveDictRequest,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("PUT", "OPTIONS").Path("/api/dictionary").Handler(httptransport.NewServer(
-		rest.MakeUpdateDictionaryEndpoint(dictionaryService),
-		rest.DecodeSaveDictRequest,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("POST", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
-		rest.MakeShallowSaveDictionaryEndpoint(dictionaryService),
-		rest.DecodeShallowSaveDictionaryRequest,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("PUT", "OPTIONS").Path("/api/dictionary/shallow").Handler(httptransport.NewServer(
-		rest.MakeShallowUpdateDictionaryEndpoint(dictionaryService),
-		rest.DecodeShallowSaveDictionaryRequest,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("DELETE", "OPTIONS").Path("/api/dictionary/{type}/{key}").Handler(httptransport.NewServer(
-		rest.MakeDeleteDictionaryEndpoint(dictionaryService),
-		rest.DecodeLoadDictRequest,
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("DELETE").Path("/api/dictionary/all").Handler(httptransport.NewServer(
-		rest.MakeDeleteAllDictionaryEndpoint(dictionaryService),
-		func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
-			return nil, nil
-		},
-		rest.EncodeSavedResponse,
-	))
-
-	r.Methods("DELETE").Path("/api/dictionary/{type}").Handler(httptransport.NewServer(
-		rest.MakeDeleteDictionaryByTypeEndpoint(dictionaryService),
-		rest.DecodeByTypeRequest,
-		rest.EncodeSavedResponse,
-	))
-}
-
-func makeConfigurationEndpoints(r *mux.Router, configurationService service.ConfigurationService) {
-
-	r.Methods("GET").Path("/api/config/{key}/{day}").Handler(httptransport.NewServer(
-		rest.MakeLoadConfigurationEndpoint(configurationService),
-		rest.DecodeLoadConfigurationRequest,
-		rest.EncodeResponse,
-	))
-
-	r.Methods("GET").Path("/api/configs/{day}").Handler(httptransport.NewServer(
-		rest.MakeLoadConfigurationArrayEndpoint(configurationService),
-		rest.DecodeLoadConfigurationArrayRequest,
-		rest.EncodeResponse,
-	))
-}
-
-func makeCalendarEndpoints(r *mux.Router, service calendar.Service) {
-	r.Methods("GET").Path("/api/calendar/{type}/{from}/{to}").Handler(httptransport.NewServer(
-		crest.MakeLoadCalendarEndpoint(service),
-		crest.DecodeLoadConfigurationArrayRequest,
-		rest.EncodeResponse,
-	))
 }
 
 func startHttpAndWaitForSigINT(port int) {
@@ -336,7 +202,7 @@ func addContext(next http.Handler) http.Handler {
 // access control and  CORS middleware
 func accessControlMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "*") // TODO: do konfiguracji
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT")
 		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
 

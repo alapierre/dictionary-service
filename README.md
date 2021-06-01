@@ -104,7 +104,7 @@ In database:
 
 Load from default tenant (or without tenant at all - no `X-Tenant-ID` header):
 
-````
+````http request
 GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
 Content-Type: application/json
 X-Tenant-ID: default
@@ -138,7 +138,7 @@ result
 
 Load from tenant1:
 
-````
+````http request
 GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
 Content-Type: application/json
 X-Tenant-ID: tenant1
@@ -159,9 +159,9 @@ Accept-Language: en-EN
 ]
 ````
 
-If in request header we put `X-Tenant-Merge-Default` with true value:
+If in request header we put `X-Tenant-Merge-Default` with `true` value:
 
-````
+````http request
 GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
 Content-Type: application/json
 X-Tenant-ID: tenant1
@@ -203,6 +203,45 @@ we will get:
 ]
 ````
 
+#### Create new, edit and delete calendar entry
+
+create
+
+````http request
+POST http://localhost:9098/api/calendar/holidays/2021-04-05
+Content-Type: application/json
+X-Tenant-ID: default
+
+{
+  "name": "Poniedziałek Wielkanocny",
+  "kind": "public holiday"
+}
+````
+
+update
+
+````http request
+PUT http://localhost:9098/api/calendar/holidays/2021-04-05
+Content-Type: application/json
+X-Tenant-ID: default
+
+{
+  "name": "Poniedziałek Wielkanocny 1234",
+  "kind": "public holiday",
+  "labels":  {
+    "holliday_type": "church holiday"
+  }
+}
+````
+
+delete
+
+````http request
+DELETE http://localhost:9098/api/calendar/holidays/2021-04-05
+Content-Type: application/json
+X-Tenant-ID: default
+````
+
 
 ### Configuration entries store and load
 
@@ -216,7 +255,7 @@ but from next year it will have other value, and we want to set it now. So, we n
 
 #### Get one value for given key, tenant and day
 
-```
+```http request
 GET http://localhost:9098/api/config/smtp.server.host/2020-01-01
 X-Tenant: default
 Accept-Language: en-EN
@@ -236,7 +275,7 @@ result:
 
 #### Get many keys, same tenant and day
 
-```
+```http request
 GET http://localhost:9098/api/configs/2020-01-01?key=smtp.server.port&key=smtp.server.host
 X-Tenant: default
 Accept-Language: en-EN
@@ -268,7 +307,7 @@ not implemented yet - put your config into database
 
 ### Create dictionary entry metadata
 
-```
+```http request
 POST http://localhost:9098/api/metadata/AbsenceType
 X-Tenant: default
 Accept-Language: en-EN
@@ -303,7 +342,7 @@ Content-Type: application/json
 
 ### Save new dictionary entry
 
-```
+```http request
 POST http://localhost:9098/api/dictionary
 Content-Type: application/json
 X-Tenant: default
@@ -339,7 +378,7 @@ Accept-Language: en-EN
 
 #### Load parent dictionary entry with children
 
-```
+```http request
 GET /api/dictionary/AbsenceType/HollidayLeave
 X-Tenant: default
 Accept-Language: en-EN
@@ -372,7 +411,7 @@ Result
 
 #### Load children only 
 
-```
+```http request
 GET /api/dictionary/AbsenceType/HollidayLeave/children
 X-Tenant: default
 Accept-Language: en-EN
@@ -399,7 +438,7 @@ Result
 
 ### Update existing dictionary entry
 
-```
+```http request
 PUT http://localhost:9098/api/dictionary
 Content-Type: application/json
 X-Tenant: default
@@ -459,7 +498,7 @@ Result
 
 #### Load all available dictionary metadata
 
-```
+```http request
 GET /api/dictionary/metadata
 X-Tenant: default
 Accept-Language: en-EN
@@ -471,7 +510,7 @@ Result
 
 #### Load dictionary metadata by type
 
-```
+```http request
 GET /api/dictionary/metadata/{type}
 X-Tenant: default
 Accept-Language: en-EN
@@ -504,7 +543,7 @@ Example result
 
 ### Update existing dictionary metadata
 
-```
+```http request
 PUT http://localhost:9098/api/metadata/DictionaryAbsenceType
 X-Tenant: default
 Accept-Language: en-EN
