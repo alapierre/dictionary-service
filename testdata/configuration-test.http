@@ -4,6 +4,29 @@ Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json
 
+> {%
+client.test("Request should return proper data from database", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("kay should be proper", function () {
+
+    client.assert(response.body.hasOwnProperty("key"))
+    client.assert(response.body.hasOwnProperty("value"))
+    client.assert(response.body.hasOwnProperty("type"))
+
+    var o = response.body.valueOf()
+    client.assert(o.key === "smtp.server.host")
+});
+%}
+
 ###
 
 GET http://localhost:9098/api/configs/2020-01-01?key=smtp.server.port&key=smtp.server.host
@@ -12,6 +35,25 @@ Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json
 
+> {%
+client.test("Request should return collection of 2 elements from database", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("should be only one element", function () {
+    var o = response.body.valueOf()
+    client.assert(o.length === 2);
+});
+
+%}
+
 ###
 
 GET http://localhost:9098/api/configs/2020-01-01?key=a&key=smtp.server.host
@@ -19,3 +61,22 @@ X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json
+
+> {%
+client.test("Request should return from database only one element for valid one key", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("should be only one element", function () {
+    var o = response.body.valueOf()
+    client.assert(o.length === 1);
+});
+
+%}

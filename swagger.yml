@@ -1,0 +1,45 @@
+paths:
+  /api/calendar/{calendarType}/{day}:
+    delete:
+      description: Delete existing calendar item
+      operationId: deleteCalendar
+    post:
+      description: Create new calendar item
+      operationId: saveCalendar
+    put:
+      description: Update existing calendar item
+      operationId: updateCalendar
+  /api/calendar/{calendarType}/{from}/{to}:
+    get:
+      description: Loads all calendar items for given type and date range
+      operationId: Calendar
+      parameters:
+      - in: query
+        name: CalendarType
+        type: string
+      - format: date-time
+        in: query
+        name: DayFrom
+        type: string
+      - format: date-time
+        in: query
+        name: DayTo
+        type: string
+responses:
+  saveCalendar:
+    description: ""
+    headers:
+      day:
+        type: string
+      kind:
+        type: string
+      labels: {}
+      name:
+        type: string
+      tenant:
+        type: string
+    schema:
+      additionalProperties:
+        type: string
+      type: object
+swagger: "2.0"

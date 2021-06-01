@@ -11,12 +11,14 @@ import (
 	"time"
 )
 
+// swagger:parameters Calendar
 type calendarRequest struct {
 	CalendarType string
 	DayFrom      time.Time
 	DayTo        time.Time
 }
 
+//swagger:response saveCalendar
 type calendarResponse struct {
 	Day    string            `json:"day"`
 	Tenant string            `json:"tenant,omitempty"`
@@ -25,6 +27,7 @@ type calendarResponse struct {
 	Labels map[string]string `json:"labels,omitempty"`
 }
 
+// swagger:parameters
 type calendarDelete struct {
 	Day          time.Time
 	CalendarType string

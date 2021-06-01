@@ -1,8 +1,8 @@
 package service
 
 import (
-	"dictionaries-service/test"
 	"dictionaries-service/util"
+	test2 "dictionaries-service/util/test"
 	slog "github.com/go-eden/slf4go"
 	"github.com/go-pg/pg/v10"
 	"os"
@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 
 	slog.Info("Running test init func")
 
-	db = test.ConnectDb()
+	db = test2.ConnectDb()
 
 	dictRepository = NewDictionaryRepository(db)
 	translationRepository := NewTranslateRepository(db)

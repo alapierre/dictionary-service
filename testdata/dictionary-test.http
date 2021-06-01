@@ -65,6 +65,65 @@ Content-Type: application/json
 X-Tenant-ID: default
 Accept-Language: en-EN
 
+> {%
+client.test("Request should return proper data from previews request", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 200, "Expected response status 200 but but received '" + statusCode + "'");
+});
+
+client.test("Response content-type is json", function () {
+    var type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+
+client.test("key should be proper", function () {
+    var o = response.body.valueOf()
+    client.assert(o.key === "uopd")
+});
+
+client.test("type should be proper", function () {
+    var o = response.body.valueOf()
+    client.assert(o.type === "AbsenceType")
+});
+
+client.test("type should be proper", function () {
+    var o = response.body.valueOf()
+    client.assert(o.onlyOnBeginOrEnd === true)
+});
+
+%}
+
+###
+
+POST http://localhost:9098/api/dictionary
+Content-Type: application/json
+X-Tenant-ID: default
+Accept-Language: en-EN
+
+{
+  "children": [
+    {
+      "key": "ch1",
+      "label": "bbb",
+      "name": "Child 1",
+      "type": "AbsenceType"
+    },
+    {
+      "key": "ch3",
+      "label": "ttt",
+      "name": "Child 3",
+      "type": "AbsenceType"
+    }
+  ],
+  "key": "Parent",
+  "name": "parent",
+  "needConfirmationDocumentNumber": false,
+  "needDeliveryDateConfirmation": false,
+  "onlyOnBeginOrEnd": true,
+  "type": "AbsenceType"
+}
+
 ###
 
 PUT http://localhost:9098/api/dictionary
@@ -75,25 +134,34 @@ Accept-Language: en-EN
 {
   "children": [
     {
-      "key": "newCh1",
+      "key": "ch1",
       "label": "bbb",
       "name": "Child 1 updated",
       "type": "AbsenceType"
     },
     {
-      "key": "newCh3",
+      "key": "ch3",
       "label": "ttt",
-      "name": "Child 3 new",
+      "name": "Child 3 updated",
       "type": "AbsenceType"
     }
   ],
-  "key": "newP",
+  "key": "Parent",
   "name": "New parent updated",
-  "needConfirmationDocumentNumber": false,
+  "needConfirmationDocumentNumber": true,
   "needDeliveryDateConfirmation": false,
   "onlyOnBeginOrEnd": true,
   "type": "AbsenceType"
 }
+
+> {%
+client.test("Request should return proper status", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 204, "Expected response status 204 but but received '" + statusCode + "'");
+});
+
+%}
 
 ###
 

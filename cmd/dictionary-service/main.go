@@ -1,8 +1,10 @@
+//go:generate swagger generate spec
 package main
 
 import (
 	"context"
 	"dictionaries-service/calendar"
+	"dictionaries-service/confguration"
 	"dictionaries-service/service"
 	"dictionaries-service/tenant"
 	rest "dictionaries-service/transport/http"
@@ -64,8 +66,8 @@ func main() {
 	metadataRepository := service.NewDictionaryMetadataRepository(db)
 	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository, metadataRepository)
 
-	configurationRepository := service.NewConfigurationRepository(db)
-	configurationService := service.NewConfigurationService(configurationRepository)
+	configurationRepository := confguration.NewRepository(db)
+	configurationService := confguration.NewService(configurationRepository)
 
 	calendarService := calendar.NewService(calendar.NewRepository(db))
 
@@ -73,8 +75,8 @@ func main() {
 	r.Use(addContext, accessControlMiddleware)
 
 	makeDictionariesEndpoints(r, dictionaryService)
-	makeConfigurationEndpoints(r, configurationService)
-	makeCalendarEndpoints(r, calendarService)
+	MakeConfigurationEndpoints(r, configurationService)
+	MakeCalendarEndpoints(r, calendarService)
 
 	http.Handle("/", r)
 	slog.Info("Started on port ", c.ServerPort)
@@ -190,7 +192,6 @@ func migrate(db *pg.DB) {
 		slog.Infof("db schema version is %d, migration is not necessary\n", oldVersion)
 	}
 }
-
 func addContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := tenant.NewContext(r.Context(), tenant.FromRequest(r))
