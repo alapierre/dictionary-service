@@ -11,10 +11,26 @@ import (
 	"time"
 )
 
+// swagger:parameters loadCalendar
 type calendarRequest struct {
-	CalendarType string
-	DayFrom      time.Time
-	DayTo        time.Time
+	// in:path
+	CalendarType string `json:"calendarType"`
+
+	// swagger:strfmt date
+	// in:path
+	DayFrom time.Time `json:"from"`
+
+	// swagger:strfmt date
+	// in:path
+	DayTo time.Time `json:"to"`
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+
+	// should combine response with given and default tenant
+	// in:header
+	Merge string `json:"X-Tenant-Merge-Default"`
 }
 
 type calendarResponse struct {
@@ -25,9 +41,50 @@ type calendarResponse struct {
 	Labels map[string]string `json:"labels,omitempty"`
 }
 
+//swagger:response calendarResponse
+type calendarResponseWrapper struct {
+	// in:body
+	Body calendarResponse
+}
+
+// swagger:parameters deleteCalendar
 type calendarDelete struct {
-	Day          time.Time
+
+	// swagger:strfmt date
+	// in:path
+	Day time.Time
+
+	// in:path
 	CalendarType string
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+}
+
+// swagger:parameters saveCalendar updateCalendar
+type SaveDtoWrapper struct {
+
+	// Calendar type id
+	// in:path
+	Type string
+
+	// Day in calendar
+	// swagger:strfmt date
+	// in:path
+	Day time.Time
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+
+	// should combine response with given and default tenant
+	// in:header
+	Merge string `json:"X-Tenant-Merge-Default"`
+
+	// Calendar body
+	// in:body
+	Body calendar.SaveDto
 }
 
 func MakeLoadCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
@@ -59,18 +116,18 @@ func DecodeLoadCalendarRequest(_ context.Context, r *http.Request) (interface{},
 
 	vars := mux.Vars(r)
 
-	from, err := time.Parse("2006-01-02", vars["from"])
+	from, err := time.Parse("2006-01-02", vars["dayFrom"])
 	if err != nil {
 		return nil, err
 	}
 
-	to, err := time.Parse("2006-01-02", vars["to"])
+	to, err := time.Parse("2006-01-02", vars["dayTo"])
 	if err != nil {
 		return nil, err
 	}
 
 	return calendarRequest{
-		CalendarType: vars["type"],
+		CalendarType: vars["calendarType"],
 		DayFrom:      from,
 		DayTo:        to,
 	}, nil

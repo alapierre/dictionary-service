@@ -24,3 +24,9 @@ push:
 run:
 	cd cmd/dictionary-service && go build -o /tmp/___go_build_main_go main.go
 	DICT_SHOW_SQL=true DICT_DATASOURCE_USER=$(DATASOURCE_USER) DICT_DATASOURCE_PASSWORD=$(DICT_DATASOURCE_PASSWORD) /tmp/___go_build_main_go
+
+swagger:
+	cd cmd/dictionary-service && swagger generate spec -o ./../../swagger.yml
+
+serve-swagger:
+	swagger serve -F=swagger swagger.yml

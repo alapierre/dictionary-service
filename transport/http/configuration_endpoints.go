@@ -11,9 +11,13 @@ import (
 	"time"
 )
 
+// swagger:parameters loadConfigForKeys
 type configurationArrayRequest struct {
-	Keys []string
-	Day  time.Time
+	Keys []string `json:"key"`
+
+	// swagger:strfmt date
+	// in:path
+	Day time.Time `json:"day"`
 }
 
 func MakeLoadConfigurationArrayEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {
@@ -66,15 +70,32 @@ func DecodeLoadConfigurationArrayRequest(_ context.Context, r *http.Request) (in
 	}, nil
 }
 
+// swagger:parameters loadConfig
 type configurationRequest struct {
-	Key string
-	Day time.Time
+	// in:path
+	Key string `json:"key"`
+	// in:path
+	Day time.Time `json:"day"`
 }
 
 type loadConfigurationResponse struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 	Type  string  `json:"type"`
+}
+
+// swagger:response loadConfigurationResponse
+type loadConfigurationResponseWrapper struct {
+
+	// in:body
+	Body []loadConfigurationResponse
+}
+
+// swagger:response loadConfigurationOneResponseWrapper
+type loadConfigurationOneResponseWrapper struct {
+
+	// in:body
+	Body loadConfigurationResponse
 }
 
 func MakeLoadConfigurationEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {

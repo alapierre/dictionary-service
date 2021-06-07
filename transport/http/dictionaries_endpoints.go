@@ -21,6 +21,12 @@ type RestError struct {
 	ErrorDescription string `json:"error_description,omitempty"`
 }
 
+//swagger:response RestError
+type RestErrorWrapper struct {
+	// in:body
+	Body RestError
+}
+
 type dictionaryRequest struct {
 	Key  string
 	Type string
