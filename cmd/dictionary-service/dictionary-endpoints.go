@@ -31,6 +31,12 @@ func makeDictionariesEndpoints(r *mux.Router, dictionaryService *service.Diction
 		rest.EncodeResponse,
 	))
 
+	// swagger:route POST /api/metadata createMetadata
+	//
+	// Create new dictionary type
+	//     Responses:
+	//       200:
+	//       400: RestError
 	r.Methods("POST", "OPTIONS").Path("/api/metadata").Handler(http.NewServer(
 		rest.MakeSaveMetadataEndpoint(dictionaryService),
 		rest.DecodeSaveMetadataRequest,

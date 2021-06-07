@@ -15,8 +15,15 @@ import (
 	"net/http"
 )
 
+// swagger:parameters createMetadata
 type saveMetadataRequest struct {
-	Type    string
+
+	// Dictionary type key
+	// in: body
+	Type string
+
+	// Json Schema describes dictionary type
+	// in: body
 	Content string
 }
 

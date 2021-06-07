@@ -1,40 +1,151 @@
+basePath: /
+consumes:
+- application/json
+host: localhost:9098
+info:
+  description: Dictionary Service to store and retrieve JSON like hierarchical dictionaries
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Dictionary Service to store and retrieve JSON like hierarchical dictionaries
+  version: 0.0.18
 paths:
   /api/calendar/{calendarType}/{day}:
     delete:
       description: Delete existing calendar item
       operationId: deleteCalendar
+      parameters:
+      - format: date-time
+        in: query
+        name: Day
+        type: string
+      - in: query
+        name: CalendarType
+        type: string
+      responses:
+        "200":
+          description: ""
     post:
       description: Create new calendar item
-      operationId: saveCalendar
+      operationId: createCalendar
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
     put:
       description: Update existing calendar item
       operationId: updateCalendar
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
   /api/calendar/{calendarType}/{from}/{to}:
     get:
       description: Loads all calendar items for given type and date range
       operationId: Calendar
       parameters:
-      - in: query
+      - in: path
         name: CalendarType
+        required: true
         type: string
       - format: date-time
-        in: query
+        in: path
         name: DayFrom
+        required: true
+        type: string
+      - format: date-time
+        in: path
+        name: DayTo
+        required: true
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/loadCalendar'
+        "400":
+          $ref: '#/responses/RestError'
+        default:
+          $ref: '#/responses/RestError'
+  /api/config/{day}:
+    get:
+      description: Load config item for requested keys in given day
+      operationId: loadAllConfigForDay
+      parameters:
+      - in: query
+        items:
+          type: string
+        name: Keys
+        type: array
+      - format: date-time
+        in: query
+        name: Day
+        type: string
+      responses:
+        "200":
+          $ref: '#/responses/loadConfigurationResponse'
+  /api/config/{key}/{day}:
+    get:
+      description: Load requested config item in given day
+      operationId: loadConfig
+      parameters:
+      - in: query
+        name: Key
         type: string
       - format: date-time
         in: query
-        name: DayTo
+        name: Day
         type: string
+      responses:
+        "200":
+          $ref: '#/responses/loadConfigurationResponse'
+  /api/metadata:
+    post:
+      description: Create new dictionary type
+      operationId: createMetadata
+      parameters:
+      - description: Dictionary type key
+        in: body
+        name: Type
+        schema:
+          type: string
+      - description: Json Schema describes dictionary type
+        in: body
+        name: Content
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+produces:
+- application/json
 responses:
-  saveCalendar:
+  RestError:
+    description: RestError general service error message
+    headers:
+      error:
+        description: Error message
+        type: string
+      error_description:
+        description: An optional field describes error in more details
+        type: string
+  loadCalendar:
     description: ""
     headers:
       day:
+        description: Day in YYYY-MM-dd format
         type: string
       kind:
+        description: Describe day kind in calendar
         type: string
-      labels: {}
+      labels:
+        description: Optional extra labels
       name:
+        description: |-
+          Day name in calendar
+          required: true
         type: string
       tenant:
         type: string
@@ -42,4 +153,15 @@ responses:
       additionalProperties:
         type: string
       type: object
+  loadConfigurationResponse:
+    description: ""
+    headers:
+      key:
+        type: string
+      type:
+        type: string
+      value:
+        type: string
+schemes:
+- http
 swagger: "2.0"

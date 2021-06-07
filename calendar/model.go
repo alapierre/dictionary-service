@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+// DictionaryCalendar calendar item
+// swagger:model DictionaryCalendar
 type DictionaryCalendar struct {
 	tableName struct{} `pg:"calendar,alias:c,discard_unknown_columns"`
 
@@ -15,18 +17,12 @@ type DictionaryCalendar struct {
 	Labels map[string]string `pg:"labels,hstore"`
 }
 
+// DictionaryCalendarType calendar type
+// swagger:model DictionaryCalendarType
 type DictionaryCalendarType struct {
 	tableName struct{} `pg:"calendar_type,alias:t,discard_unknown_columns"`
 
 	Type   string `pg:"type,pk"`
 	Name   string `pg:"name"`
 	Tenant string `pg:"tenant,pk,use_zero"`
-}
-
-type SaveDto struct {
-	Day          time.Time         `json:"-"`
-	CalendarType string            `json:"-"`
-	Name         string            `json:"name"`
-	Kind         *string           `json:"kind,omitempty"`
-	Labels       map[string]string `json:"labels,omitempty"`
 }

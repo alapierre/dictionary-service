@@ -2,6 +2,7 @@ package calendar
 
 import (
 	"context"
+	"dictionaries-service/calendar/transport/http"
 	"dictionaries-service/tenant"
 	"fmt"
 	"time"
@@ -17,12 +18,12 @@ type service struct {
 
 type Service interface {
 	LoadByTypeAndRange(ctx context.Context, calendarType string, from, to time.Time) ([]DictionaryCalendar, error)
-	Save(ctx context.Context, calendar *SaveDto) error
-	Update(ctx context.Context, calendar *SaveDto) error
+	Save(ctx context.Context, calendar *http.SaveDto) error
+	Update(ctx context.Context, calendar *http.SaveDto) error
 	Delete(ctx context.Context, calendarType string, day time.Time) error
 }
 
-func (s *service) Save(ctx context.Context, calendar *SaveDto) error {
+func (s *service) Save(ctx context.Context, calendar *http.SaveDto) error {
 
 	t, ok := tenant.FromContext(ctx)
 	if !ok {
@@ -32,7 +33,7 @@ func (s *service) Save(ctx context.Context, calendar *SaveDto) error {
 	return s.repository.Save(mapCalendar(calendar, t))
 }
 
-func (s *service) Update(ctx context.Context, calendar *SaveDto) error {
+func (s *service) Update(ctx context.Context, calendar *http.SaveDto) error {
 
 	t, ok := tenant.FromContext(ctx)
 	if !ok {
@@ -42,7 +43,7 @@ func (s *service) Update(ctx context.Context, calendar *SaveDto) error {
 	return s.repository.Update(mapCalendar(calendar, t))
 }
 
-func mapCalendar(calendar *SaveDto, t tenant.Tenant) *DictionaryCalendar {
+func mapCalendar(calendar *http.SaveDto, t tenant.Tenant) *DictionaryCalendar {
 	return &DictionaryCalendar{
 		Day:    calendar.Day,
 		Tenant: t.Name,

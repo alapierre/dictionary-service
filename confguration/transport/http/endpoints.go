@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// swagger:parameters loadAllConfigForDay
 type configurationArrayRequest struct {
 	Keys []string
 	Day  time.Time
@@ -67,11 +68,13 @@ func DecodeLoadConfigurationArrayRequest(_ context.Context, r *http.Request) (in
 	}, nil
 }
 
+// swagger:parameters loadConfig
 type configurationRequest struct {
 	Key string
 	Day time.Time
 }
 
+// swagger:response loadConfigurationResponse
 type loadConfigurationResponse struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`

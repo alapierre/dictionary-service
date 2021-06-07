@@ -13,24 +13,57 @@ import (
 
 // swagger:parameters Calendar
 type calendarRequest struct {
+
+	// in: path
 	CalendarType string
-	DayFrom      time.Time
-	DayTo        time.Time
+
+	// in: path
+	DayFrom time.Time
+
+	// in: path
+	DayTo time.Time
 }
 
-//swagger:response saveCalendar
+//swagger:response loadCalendar
 type calendarResponse struct {
-	Day    string            `json:"day"`
-	Tenant string            `json:"tenant,omitempty"`
-	Name   *string           `json:"name"`
-	Kind   *string           `json:"kind,omitempty"`
+
+	// Day in YYYY-MM-dd format
+	Day string `json:"day"`
+
+	Tenant string `json:"tenant,omitempty"`
+
+	// Day name in calendar
+	// required: true
+	Name *string `json:"name"`
+
+	// Describe day kind in calendar
+	Kind *string `json:"kind,omitempty"`
+
+	// Optional extra labels
 	Labels map[string]string `json:"labels,omitempty"`
 }
 
-// swagger:parameters
+// swagger:parameters deleteCalendar
 type calendarDelete struct {
 	Day          time.Time
 	CalendarType string
+}
+
+// SaveDto model for create new Calendar item
+// swagger1:parameters createCalendar
+// in: body
+type SaveDto struct {
+	Day          time.Time `json:"-"`
+	CalendarType string    `json:"-"`
+
+	// Name of day in calendar
+	Name string `json:"name"`
+
+	// Kind of day, any string value useful for you eg. holiday type
+	Kind *string `json:"kind,omitempty"`
+
+	// extra labels describes day in calendar, eg. holiday properties
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 func MakeLoadCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
@@ -81,7 +114,7 @@ func DecodeLoadCalendarRequest(_ context.Context, r *http.Request) (interface{},
 
 func MakeSaveCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(calendar.SaveDto)
+		req := request.(SaveDto)
 		err := service.Save(ctx, &req)
 
 		if err != nil {
@@ -94,7 +127,7 @@ func MakeSaveCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
 
 func MakeUpdateCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(calendar.SaveDto)
+		req := request.(SaveDto)
 		err := service.Update(ctx, &req)
 
 		if err != nil {
@@ -114,7 +147,7 @@ func DecodeSaveCalendarRequest(_ context.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 
-	var request calendar.SaveDto
+	var request SaveDto
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}

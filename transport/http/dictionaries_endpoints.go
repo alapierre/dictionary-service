@@ -16,8 +16,13 @@ import (
 
 var DefaultLanguage language.Tag
 
+// RestError general service error message
+// swagger:response RestError
 type RestError struct {
-	Error            string `json:"error,omitempty"`
+
+	// Error message
+	Error string `json:"error,omitempty"`
+	// An optional field describes error in more details
 	ErrorDescription string `json:"error_description,omitempty"`
 }
 
