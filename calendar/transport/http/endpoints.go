@@ -13,6 +13,7 @@ import (
 
 // swagger:parameters loadCalendar
 type calendarRequest struct {
+
 	// in:path
 	CalendarType string `json:"calendarType"`
 
@@ -52,10 +53,10 @@ type calendarDelete struct {
 
 	// swagger:strfmt date
 	// in:path
-	Day time.Time
+	Day time.Time `json:"day"`
 
 	// in:path
-	CalendarType string
+	CalendarType string `json:"type"`
 
 	// optional tenant id
 	// in:header
