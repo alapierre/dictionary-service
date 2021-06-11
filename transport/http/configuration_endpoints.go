@@ -11,9 +11,13 @@ import (
 	"time"
 )
 
+// swagger:parameters loadConfigForKeys
 type configurationArrayRequest struct {
-	Keys []string
-	Day  time.Time
+	Keys []string `json:"key"`
+
+	// swagger:strfmt date
+	// in:path
+	Day time.Time `json:"day"`
 }
 
 func MakeLoadConfigurationArrayEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {
@@ -21,12 +25,12 @@ func MakeLoadConfigurationArrayEndpoint(configurationService service.Configurati
 
 		t, ok := tenant.FromContext(ctx)
 		if !ok {
-			return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+			return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 		}
 
 		req := request.(configurationArrayRequest)
 
-		configs := configurationService.LoadMany(t, req.Day, req.Keys...)
+		configs := configurationService.LoadMany(t.Name, req.Day, req.Keys...)
 		var res []loadConfigurationResponse
 
 		var value *string
@@ -66,9 +70,12 @@ func DecodeLoadConfigurationArrayRequest(_ context.Context, r *http.Request) (in
 	}, nil
 }
 
+// swagger:parameters loadConfig
 type configurationRequest struct {
-	Key string
-	Day time.Time
+	// in:path
+	Key string `json:"key"`
+	// in:path
+	Day time.Time `json:"day"`
 }
 
 type loadConfigurationResponse struct {
@@ -77,20 +84,34 @@ type loadConfigurationResponse struct {
 	Type  string  `json:"type"`
 }
 
+// swagger:response loadConfigurationResponse
+type loadConfigurationResponseWrapper struct {
+
+	// in:body
+	Body []loadConfigurationResponse
+}
+
+// swagger:response loadConfigurationOneResponseWrapper
+type loadConfigurationOneResponseWrapper struct {
+
+	// in:body
+	Body loadConfigurationResponse
+}
+
 func MakeLoadConfigurationEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
 		t, ok := tenant.FromContext(ctx)
 		if !ok {
-			return makeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+			return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 		}
 
 		req := request.(configurationRequest)
 
-		r, err := configurationService.LoadForDay(req.Key, t, req.Day)
+		r, err := configurationService.LoadForDay(req.Key, t.Name, req.Day)
 
 		if err != nil {
-			return makeRestError(err, "cant_load_configuration_by_key_tenant_and_day")
+			return MakeRestError(err, "cant_load_configuration_by_key_tenant_and_day")
 		}
 
 		var value *string

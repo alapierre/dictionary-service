@@ -1,0 +1,272 @@
+basePath: /
+consumes:
+- application/json
+definitions:
+  RestError:
+    properties:
+      error:
+        type: string
+        x-go-name: Error
+      error_description:
+        type: string
+        x-go-name: ErrorDescription
+    type: object
+    x-go-package: dictionaries-service/transport/http
+  SaveDto:
+    properties:
+      kind:
+        type: string
+        x-go-name: Kind
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+        x-go-name: Labels
+      name:
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: dictionaries-service/calendar
+  calendarResponse:
+    properties:
+      day:
+        type: string
+        x-go-name: Day
+      kind:
+        type: string
+        x-go-name: Kind
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+        x-go-name: Labels
+      name:
+        type: string
+        x-go-name: Name
+      tenant:
+        type: string
+        x-go-name: Tenant
+    type: object
+    x-go-package: dictionaries-service/calendar/transport/http
+  loadConfigurationResponse:
+    properties:
+      key:
+        type: string
+        x-go-name: Key
+      type:
+        type: string
+        x-go-name: Type
+      value:
+        type: string
+        x-go-name: Value
+    type: object
+    x-go-package: dictionaries-service/transport/http
+host: localhost:9098
+info:
+  description: |-
+    Dictionary Service to store and retrieve JSON like hierarchical dictionaries
+    configuration values in time and calendars
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Dictionary Service
+  version: 0.0.19
+paths:
+  /api/calendar/{calendarType}/{from}/{to}:
+    get:
+      description: Loads all calendar items for given type and date range
+      operationId: loadCalendar
+      parameters:
+      - in: path
+        name: calendarType
+        required: true
+        type: string
+        x-go-name: CalendarType
+      - format: date
+        in: path
+        name: from
+        required: true
+        type: string
+        x-go-name: DayFrom
+      - format: date
+        in: path
+        name: to
+        required: true
+        type: string
+        x-go-name: DayTo
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: should combine response with given and default tenant
+        in: header
+        name: X-Tenant-Merge-Default
+        type: string
+        x-go-name: Merge
+      responses:
+        "200":
+          $ref: '#/responses/calendarResponse'
+        "400":
+          $ref: '#/responses/RestError'
+  /api/calendar/{type}/{day}:
+    delete:
+      description: Delete existing calendar item for given type and day
+      operationId: deleteCalendar
+      parameters:
+      - format: date
+        in: path
+        name: Day
+        required: true
+        type: string
+      - in: path
+        name: CalendarType
+        required: true
+        type: string
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+    post:
+      description: Create new calendar item for given type and day
+      operationId: saveCalendar
+      parameters:
+      - description: Calendar type id
+        in: path
+        name: Type
+        required: true
+        type: string
+      - description: Day in calendar
+        format: date
+        in: path
+        name: Day
+        required: true
+        type: string
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: should combine response with given and default tenant
+        in: header
+        name: X-Tenant-Merge-Default
+        type: string
+        x-go-name: Merge
+      - description: Calendar body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/SaveDto'
+      responses:
+        "201":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+    put:
+      description: Update existing calendar item for given type and day
+      operationId: updateCalendar
+      parameters:
+      - description: Calendar type id
+        in: path
+        name: Type
+        required: true
+        type: string
+      - description: Day in calendar
+        format: date
+        in: path
+        name: Day
+        required: true
+        type: string
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: should combine response with given and default tenant
+        in: header
+        name: X-Tenant-Merge-Default
+        type: string
+        x-go-name: Merge
+      - description: Calendar body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/SaveDto'
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+  /api/config/{key}/{day}:
+    get:
+      description: Loads all calendar items for given type and date range
+      operationId: loadConfig
+      parameters:
+      - in: path
+        name: key
+        required: true
+        type: string
+        x-go-name: Key
+      - format: date-time
+        in: path
+        name: day
+        required: true
+        type: string
+        x-go-name: Day
+      responses:
+        "200":
+          $ref: '#/responses/loadConfigurationOneResponseWrapper'
+        "400":
+          $ref: '#/responses/RestError'
+  /api/configs/{day}:
+    get:
+      description: Loads all calendar items for given type and date range
+      operationId: loadConfigForKeys
+      parameters:
+      - in: query
+        items:
+          type: string
+        name: key
+        type: array
+        x-go-name: Keys
+      - format: date
+        in: path
+        name: day
+        required: true
+        type: string
+        x-go-name: Day
+      responses:
+        "200":
+          $ref: '#/responses/loadConfigurationResponse'
+        "400":
+          $ref: '#/responses/RestError'
+produces:
+- application/json
+responses:
+  RestError:
+    description: ""
+    schema:
+      $ref: '#/definitions/RestError'
+  calendarResponse:
+    description: ""
+    schema:
+      $ref: '#/definitions/calendarResponse'
+  loadConfigurationOneResponseWrapper:
+    description: ""
+    schema:
+      $ref: '#/definitions/loadConfigurationResponse'
+  loadConfigurationResponse:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/loadConfigurationResponse'
+      type: array
+schemes:
+- http
+swagger: "2.0"

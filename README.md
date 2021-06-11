@@ -10,21 +10,22 @@ Fast and simple dictionary service on PostgreSQL database and JSON content
 Almost any system needs to store and manage flexible dictionary values. Some of these need variable over time configuration. 
 
 - provide fast REST microservice for storing dictionary in JSON format 
-- store configuration values changeable over time (eg. what will be configuration value of X in 2025-12-31?)
 - dictionaries should be describable - for automatic GUI build
 - i18n support for dictionary names
+- store configuration values changeable over time (e.g. what will be configuration value of X in 2025-12-31?)
+- store calendar like dictionaries (the dictionary key is a date) e.g. holiday calendar
 - integrate with Netflix Eureka and oAtuh
 - no additional, other than PostgreSQL database, for store dictionaries and configuration data - in cloud operators noSQL database is additional cost
 
 ## Current status
 
-In tests on production in several commercial projects. 
+In production in several commercial projects. 
 
 ## The Latest news
 
-- Translate dictionary name base on Accept-Language header
-- loading children for given parent, type and tenant
 - Configuration load (store and update - soon)
+- Calendar dictionary load, store and update
+- swagger support (if you want serve swagger gui or generate open API file, you need to install goswagger: https://goswagger.io/install.html)
 
 ## Required environment variables
 
@@ -84,6 +85,165 @@ volumes:
   pg_data:
 ```
 
+### Calendar dictionaries
+
+When we need store e.g. list of free days like holiday calendar, the best suitable will be dictionary with date as a key 
+and possibility to get all entries in date range. Then we can get all holidays e.g. in 2021 year. 
+Some time we need extra information about free day, e.g. to count salary components for work on a holiday.
+This is the reason why the calendar API was created.
+
+Because in many cases we have common holiday calendar for more than one tenant (application, module) it is possible to 
+use default tenant as a base calendar and override it in specific tenant if needed. 
+
+In database:
+
+| tenant     | type     | name         | kind           | labels                            | day        |
+|------------|----------|--------------|----------------|-----------------------------------|------------|
+|            | holidays | Nowy Rok     | public holiday | "holliday_type"=>"country"        | 2021-01-01 |
+|            | holidays | Trzech Króli | public holiday | "holliday_type"=>"church holiday" | 2021-01-06 | 
+| tenant1    | holidays | Barburka     | company holiday| "holliday_type"=>"company day"    | 2021-12-04 |
+
+Load from default tenant (or without tenant at all - no `X-Tenant-ID` header):
+
+````http request
+GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
+Content-Type: application/json
+X-Tenant-ID: default
+Accept-Language: en-EN
+````
+
+result
+
+````json
+[
+  {
+    "day": "2021-01-01",
+    "tenant": "",
+    "name": "Nowy Rok",
+    "kind": "public holiday",
+    "labels": {
+      "holliday_type": "country"
+    }
+  },
+  {
+    "day": "2021-01-06",
+    "tenant": "",
+    "name": "Trzech Króli",
+    "kind": "public holiday",
+    "labels": {
+       "holliday_type": "church holiday"
+    }
+  }
+]
+````
+
+Load from tenant1:
+
+````http request
+GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
+Content-Type: application/json
+X-Tenant-ID: tenant1
+Accept-Language: en-EN
+````
+
+````json
+[
+  {
+    "day": "2021-12-04",
+    "tenant": "tenant1",
+    "name": "Barburka",
+    "kind": "company holiday",
+    "labels": {
+       "holliday_type": "company day"
+    }
+  }
+]
+````
+
+If in request header we put `X-Tenant-Merge-Default` with `true` value:
+
+````http request
+GET http://localhost:9098/api/calendar/holidays/2021-01-01/2021-12-31
+Content-Type: application/json
+X-Tenant-ID: tenant1
+X-Tenant-Merge-Default: true
+Accept-Language: en-EN
+````
+
+we will get:
+
+````json
+[
+  {
+    "day": "2021-01-01",
+    "tenant": "",
+    "name": "Nowy Rok",
+    "kind": "public holiday",
+    "labels": {
+      "holliday_type": "country"
+    }
+  },
+  {
+    "day": "2021-01-06",
+    "tenant": "",
+    "name": "Trzech Króli",
+    "kind": "public holiday",
+    "labels": {
+       "holliday_type": "church holiday"
+    }
+  },
+ {
+  "day": "2021-12-04",
+  "tenant": "tenant1",
+  "name": "Barburka",
+  "kind": "company holiday",
+  "labels": {
+      "holliday_type": "company day"
+  }
+ }
+]
+````
+
+#### Create new, edit and delete calendar entry
+
+create
+
+````http request
+POST http://localhost:9098/api/calendar/holidays/2021-04-05
+Content-Type: application/json
+X-Tenant-ID: default
+
+{
+  "name": "Poniedziałek Wielkanocny",
+  "kind": "public holiday"
+}
+````
+
+update
+
+````http request
+PUT http://localhost:9098/api/calendar/holidays/2021-04-05
+Content-Type: application/json
+X-Tenant-ID: default
+
+{
+  "name": "Poniedziałek Wielkanocny 1234",
+  "kind": "public holiday",
+  "labels":  {
+    "holliday_type": "church holiday"
+  }
+}
+````
+
+delete
+
+````http request
+DELETE http://localhost:9098/api/calendar/holidays/2021-04-05
+Content-Type: application/json
+X-Tenant-ID: default
+````
+
+
 ### Configuration entries store and load
 
 Every config parameter has own period of validity, eg. in January smtp.server.host was localhost, 
@@ -96,7 +256,7 @@ but from next year it will have other value, and we want to set it now. So, we n
 
 #### Get one value for given key, tenant and day
 
-```
+```http request
 GET http://localhost:9098/api/config/smtp.server.host/2020-01-01
 X-Tenant: default
 Accept-Language: en-EN
@@ -116,7 +276,7 @@ result:
 
 #### Get many keys, same tenant and day
 
-```
+```http request
 GET http://localhost:9098/api/configs/2020-01-01?key=smtp.server.port&key=smtp.server.host
 X-Tenant: default
 Accept-Language: en-EN
@@ -148,7 +308,7 @@ not implemented yet - put your config into database
 
 ### Create dictionary entry metadata
 
-```
+```http request
 POST http://localhost:9098/api/metadata/AbsenceType
 X-Tenant: default
 Accept-Language: en-EN
@@ -183,7 +343,7 @@ Content-Type: application/json
 
 ### Save new dictionary entry
 
-```
+```http request
 POST http://localhost:9098/api/dictionary
 Content-Type: application/json
 X-Tenant: default
@@ -219,7 +379,7 @@ Accept-Language: en-EN
 
 #### Load parent dictionary entry with children
 
-```
+```http request
 GET /api/dictionary/AbsenceType/HollidayLeave
 X-Tenant: default
 Accept-Language: en-EN
@@ -252,7 +412,7 @@ Result
 
 #### Load children only 
 
-```
+```http request
 GET /api/dictionary/AbsenceType/HollidayLeave/children
 X-Tenant: default
 Accept-Language: en-EN
@@ -279,7 +439,7 @@ Result
 
 ### Update existing dictionary entry
 
-```
+```http request
 PUT http://localhost:9098/api/dictionary
 Content-Type: application/json
 X-Tenant: default
@@ -339,7 +499,7 @@ Result
 
 #### Load all available dictionary metadata
 
-```
+```http request
 GET /api/dictionary/metadata
 X-Tenant: default
 Accept-Language: en-EN
@@ -351,7 +511,7 @@ Result
 
 #### Load dictionary metadata by type
 
-```
+```http request
 GET /api/dictionary/metadata/{type}
 X-Tenant: default
 Accept-Language: en-EN
@@ -384,7 +544,7 @@ Example result
 
 ### Update existing dictionary metadata
 
-```
+```http request
 PUT http://localhost:9098/api/metadata/DictionaryAbsenceType
 X-Tenant: default
 Accept-Language: en-EN

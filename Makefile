@@ -8,7 +8,7 @@ DATASOURCE_USER=app
 DICT_DATASOURCE_PASSWORD=qwedsazxc
 
 modelgen:
-	genna model -c $(CONNECTION_STRING) -o model/model.go -k -g 9
+	genna model -c $(CONNECTION_STRING) -t dictionary.calendar_type,dictionary.calendar -o model/calendar.go -k
 
 build:
 	cd cmd/dictionary-service && CGO_ENABLED=0 go build -a -installsuffix cgo -o dictionary-service .
@@ -24,3 +24,9 @@ push:
 run:
 	cd cmd/dictionary-service && go build -o /tmp/___go_build_main_go main.go
 	DICT_SHOW_SQL=true DICT_DATASOURCE_USER=$(DATASOURCE_USER) DICT_DATASOURCE_PASSWORD=$(DICT_DATASOURCE_PASSWORD) /tmp/___go_build_main_go
+
+swagger:
+	cd cmd/dictionary-service && swagger generate spec -o ./../../swagger.yml
+
+serve-swagger:
+	swagger serve -F=swagger swagger.yml
