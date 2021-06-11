@@ -24,7 +24,8 @@ In production in several commercial projects.
 ## The Latest news
 
 - Configuration load (store and update - soon)
-- Calendar dictionary load (store and update - soon)
+- Calendar dictionary load, store and update
+- swagger support (if you want serve swagger gui or generate open API file, you need to install goswagger: https://goswagger.io/install.html)
 
 ## Required environment variables
 
