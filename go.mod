@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.0
+	go.opentelemetry.io/otel v0.20.0 // indirect
 	golang.org/x/text v0.3.6
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

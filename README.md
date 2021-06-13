@@ -87,10 +87,10 @@ volumes:
 
 ### Calendar dictionaries
 
-When we need store e.g. list of free days like holiday calendar, the best suitable will be dictionary with date as a key 
-and possibility to get all entries in date range. Then we can get all holidays e.g. in 2021 year. 
-Some time we need extra information about free day, e.g. to count salary components for work on a holiday.
-This is the reason why the calendar API was created.
+When we need store e.g., list of free days like holiday calendar, the best suitable will be dictionary with date as a key 
+and possibility to get all entries in date range. Then we can get all holidays e.g., in 2021 year. 
+Some time we need extra information about free day, e.g., to count salary components for work on a holiday.
+This is the reason the calendar API created.
 
 Because in many cases we have common holiday calendar for more than one tenant (application, module) it is possible to 
 use default tenant as a base calendar and override it in specific tenant if needed. 
@@ -209,11 +209,12 @@ we will get:
 create
 
 ````http request
-POST http://localhost:9098/api/calendar/holidays/2021-04-05
+POST http://localhost:9098/api/calendar/holidays
 Content-Type: application/json
 X-Tenant-ID: default
 
 {
+  "day": "2021-04-05",
   "name": "Poniedziałek Wielkanocny",
   "kind": "public holiday"
 }
@@ -222,11 +223,12 @@ X-Tenant-ID: default
 update
 
 ````http request
-PUT http://localhost:9098/api/calendar/holidays/2021-04-05
+PUT http://localhost:9098/api/calendar/holidays
 Content-Type: application/json
 X-Tenant-ID: default
 
 {
+  "day": "2021-04-05",
   "name": "Poniedziałek Wielkanocny 1234",
   "kind": "public holiday",
   "labels":  {
@@ -246,7 +248,7 @@ X-Tenant-ID: default
 
 ### Configuration entries store and load
 
-Every config parameter has own period of validity, eg. in January smtp.server.host was localhost, 
+Every config parameter has own period of validity, e.g., in January smtp.server.host was localhost, 
 but from next year it will have other value, and we want to set it now. So, we need two records in database:
  
  | value     | date_form | date_to  |
@@ -258,7 +260,7 @@ but from next year it will have other value, and we want to set it now. So, we n
 
 ```http request
 GET http://localhost:9098/api/config/smtp.server.host/2020-01-01
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json
@@ -278,7 +280,7 @@ result:
 
 ```http request
 GET http://localhost:9098/api/configs/2020-01-01?key=smtp.server.port&key=smtp.server.host
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json
@@ -310,7 +312,7 @@ not implemented yet - put your config into database
 
 ```http request
 POST http://localhost:9098/api/metadata/AbsenceType
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Content-Type: application/json
@@ -346,7 +348,7 @@ Content-Type: application/json
 ```http request
 POST http://localhost:9098/api/dictionary
 Content-Type: application/json
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 
 {
@@ -381,7 +383,7 @@ Accept-Language: en-EN
 
 ```http request
 GET /api/dictionary/AbsenceType/HollidayLeave
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 ```
 
@@ -414,7 +416,7 @@ Result
 
 ```http request
 GET /api/dictionary/AbsenceType/HollidayLeave/children
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 ```
 
@@ -442,7 +444,7 @@ Result
 ```http request
 PUT http://localhost:9098/api/dictionary
 Content-Type: application/json
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 
 {
@@ -501,7 +503,7 @@ Result
 
 ```http request
 GET /api/dictionary/metadata
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 ```
 Result
@@ -513,7 +515,7 @@ Result
 
 ```http request
 GET /api/dictionary/metadata/{type}
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 ```
 
@@ -546,7 +548,7 @@ Example result
 
 ```http request
 PUT http://localhost:9098/api/metadata/DictionaryAbsenceType
-X-Tenant: default
+X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Content-Type: application/json
