@@ -2,6 +2,16 @@ basePath: /
 consumes:
 - application/json
 definitions:
+  DictionaryCalendarType:
+    properties:
+      name:
+        type: string
+        x-go-name: Name
+      type:
+        type: string
+        x-go-name: Type
+    type: object
+    x-go-package: dictionaries-service/calendar
   RestError:
     properties:
       error:
@@ -14,6 +24,10 @@ definitions:
     x-go-package: dictionaries-service/transport/http
   SaveDto:
     properties:
+      day:
+        format: date
+        type: string
+        x-go-name: Day
       kind:
         type: string
         x-go-name: Kind
@@ -68,10 +82,25 @@ info:
     configuration values in time and calendars
   license:
     name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
   title: Dictionary Service
-  version: 0.0.19
+  version: 0.0.20
 paths:
+  /api/calendar:
+    get:
+      description: Loads all calendar types
+      operationId: loadCalendarTypes
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      responses:
+        "200":
+          $ref: '#/responses/calendarTypeResponse'
+        "400":
+          $ref: '#/responses/RestError'
   /api/calendar/{calendarType}/{from}/{to}:
     get:
       description: Loads all calendar items for given type and date range
@@ -109,45 +138,17 @@ paths:
           $ref: '#/responses/calendarResponse'
         "400":
           $ref: '#/responses/RestError'
-  /api/calendar/{type}/{day}:
-    delete:
-      description: Delete existing calendar item for given type and day
-      operationId: deleteCalendar
-      parameters:
-      - format: date
-        in: path
-        name: Day
-        required: true
-        type: string
-      - in: path
-        name: CalendarType
-        required: true
-        type: string
-      - description: optional tenant id
-        in: header
-        name: X-Tenant-ID
-        type: string
-        x-go-name: Tenant
-      responses:
-        "200":
-          description: ""
-        "400":
-          $ref: '#/responses/RestError'
+  /api/calendar/{type}:
     post:
       description: Create new calendar item for given type and day
       operationId: saveCalendar
       parameters:
       - description: Calendar type id
         in: path
-        name: Type
+        name: type
         required: true
         type: string
-      - description: Day in calendar
-        format: date
-        in: path
-        name: Day
-        required: true
-        type: string
+        x-go-name: Type
       - description: optional tenant id
         in: header
         name: X-Tenant-ID
@@ -174,15 +175,10 @@ paths:
       parameters:
       - description: Calendar type id
         in: path
-        name: Type
+        name: type
         required: true
         type: string
-      - description: Day in calendar
-        format: date
-        in: path
-        name: Day
-        required: true
-        type: string
+        x-go-name: Type
       - description: optional tenant id
         in: header
         name: X-Tenant-ID
@@ -198,6 +194,32 @@ paths:
         name: Body
         schema:
           $ref: '#/definitions/SaveDto'
+      responses:
+        "204":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+  /api/calendar/{type}/{day}:
+    delete:
+      description: Delete existing calendar item for given type and day
+      operationId: deleteCalendar
+      parameters:
+      - format: date
+        in: path
+        name: day
+        required: true
+        type: string
+        x-go-name: Day
+      - in: path
+        name: type
+        required: true
+        type: string
+        x-go-name: CalendarType
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
       responses:
         "200":
           description: ""
@@ -257,6 +279,12 @@ responses:
     description: ""
     schema:
       $ref: '#/definitions/calendarResponse'
+  calendarTypeResponse:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/DictionaryCalendarType'
+      type: array
   loadConfigurationOneResponseWrapper:
     description: ""
     schema:

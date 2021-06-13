@@ -6,6 +6,7 @@
       <env name="DICT_CONNECTION_STRING" value="postgres://app:qwedsazxc@localhost:5432/app?sslmode=disable" />
       <env name="DICT_DATASOURCE_USER" value="app" />
       <env name="DICT_DATASOURCE_PASSWORD" value="qwedsazxc" />
+      <env name="DICT_ENABLE_EUREKA" value="false" />
     </envs>
     <kind value="DIRECTORY" />
     <package value="dictionaries-service" />

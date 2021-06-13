@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 
 	db = test2.ConnectDb()
 	repository = NewRepository(db)
-	calendarService = NewService(repository)
+	calendarService = NewService(repository, NewTypeRepository(db))
 
 	ex := m.Run()
 

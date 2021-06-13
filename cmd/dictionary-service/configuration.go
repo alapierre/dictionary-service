@@ -15,7 +15,7 @@ func makeConfigurationEndpoints(r *mux.Router, configurationService service.Conf
 	//     Responses:
 	//       200: loadConfigurationOneResponseWrapper
 	//       400: RestError
-	r.Methods("GET").Path("/api/config/{key}/{day}").Handler(http.NewServer(
+	r.Methods("GET", "OPTIONS").Path("/api/config/{key}/{day}").Handler(http.NewServer(
 		rest.MakeLoadConfigurationEndpoint(configurationService),
 		rest.DecodeLoadConfigurationRequest,
 		rest.EncodeResponse,
@@ -27,7 +27,7 @@ func makeConfigurationEndpoints(r *mux.Router, configurationService service.Conf
 	//     Responses:
 	//       200: loadConfigurationResponse
 	//       400: RestError
-	r.Methods("GET").Path("/api/configs/{day}").Handler(http.NewServer(
+	r.Methods("GET", "OPTIONS").Path("/api/configs/{day}").Handler(http.NewServer(
 		rest.MakeLoadConfigurationArrayEndpoint(configurationService),
 		rest.DecodeLoadConfigurationArrayRequest,
 		rest.EncodeResponse,

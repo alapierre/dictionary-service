@@ -1,22 +1,51 @@
-POST http://localhost:9098/api/calendar/holidays/2021-04-04
-Content-Type: application/json
+GET http://localhost:9098/api/calendar
+accept: application/json
 X-Tenant-ID: default
 
+###
+
+POST http://localhost:9098/api/calendar/holidays
+accept: application/json
+Content-Type: application/json
+
 {
-  "name": "Wielkanoc",
+  "day": "2021-11-01",
   "kind": "public holiday",
-  "labels":  {
-    "holliday_type": "church holiday"
-   }
+  "name": "Święto Niepodległości"
 }
 
 ###
 
-POST http://localhost:9098/api/calendar/holidays/2021-04-05
+POST http://localhost:9098/api/calendar/holidays
+accept: application/json
+Content-Type: application/json
+
+{
+  "day": "2021-06-03",
+  "kind": "public holiday",
+  "name": "Boże Ciało"
+}
+
+###
+
+POST http://localhost:9098/api/calendar/holidays
 Content-Type: application/json
 X-Tenant-ID: default
 
 {
+  "day": "2021-05-03",
+  "name": "Święto Konstytucji 3 Maja",
+  "kind": "public holiday"
+}
+
+###
+
+POST http://localhost:9098/api/calendar/holidays
+Content-Type: application/json
+X-Tenant-ID: default
+
+{
+  "day": "2021-04-05",
   "name": "Poniedziałek Wielkanocny",
   "kind": "public holiday",
   "labels":  {
@@ -26,22 +55,24 @@ X-Tenant-ID: default
 
 ###
 
-POST http://localhost:9098/api/calendar/holidays/2021-05-01
+POST http://localhost:9098/api/calendar/holidays
 Content-Type: application/json
 X-Tenant-ID: default
 
 {
+  "day":  "2021-05-01",
   "name": "Święto Pracy",
   "kind": "public holiday"
 }
 
 ###
 
-PUT http://localhost:9098/api/calendar/holidays/2021-04-05
+PUT http://localhost:9098/api/calendar/holidays
 Content-Type: application/json
 X-Tenant-ID: default
 
 {
+  "day": "2021-04-05",
   "name": "Poniedziałek Wielkanocny 1234",
   "kind": "public holiday",
   "labels":  {
@@ -51,11 +82,12 @@ X-Tenant-ID: default
 
 ###
 # should fail but is is not!
-PUT http://localhost:9098/api/calendar/holidays/2021-04-30
+PUT http://localhost:9098/api/calendar/holidays
 Content-Type: application/json
 X-Tenant-ID: default
 
 {
+  "day":  "2021-04-30",
   "name": "Poniedziałek Wielkanocny 1234",
   "kind": "public holiday",
   "labels":  {
