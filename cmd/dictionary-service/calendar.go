@@ -63,11 +63,11 @@ func makeCalendarEndpoints(r *mux.Router, service calendar.Service) {
 	//
 	// Delete existing calendar item for given type and day
 	//     Responses:
-	//       200:
+	//       204:
 	//       400: RestError
 	r.Methods("DELETE", "OPTIONS").Path("/api/calendar/{type}/{day}").Handler(http.NewServer(
 		rest.MakeDeleteCalendar(service),
 		rest.DecodeDeleteCalendarRequest,
-		common.EncodeSavedResponse,
+		common.EncodeWithStatus(204),
 	))
 }

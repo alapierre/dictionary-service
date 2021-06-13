@@ -221,7 +221,7 @@ paths:
         type: string
         x-go-name: Tenant
       responses:
-        "200":
+        "204":
           description: ""
         "400":
           $ref: '#/responses/RestError'

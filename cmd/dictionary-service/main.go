@@ -212,7 +212,7 @@ func accessControlMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", c.AccessControlAllowOrigin)
 		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, X-Tenant-Merge-Default, "+c.TenantHeaderName)
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 
 		if r.Method == "OPTIONS" {
 			return

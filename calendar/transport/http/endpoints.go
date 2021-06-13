@@ -178,7 +178,7 @@ func MakeUpdateCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
 		err := service.Update(ctx, &req)
 
 		if err != nil {
-			return commons.MakeRestError(err, "cant_create_new_dictionary_entry")
+			return commons.MakeRestError(err, "cant_update_dictionary_entry")
 		}
 
 		return nil, nil
@@ -202,7 +202,12 @@ func DecodeSaveCalendarRequest(_ context.Context, r *http.Request) (interface{},
 func MakeDeleteCalendar(service calendar.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(calendarDelete)
-		return nil, service.Delete(ctx, req.CalendarType, req.Day)
+
+		if err := service.Delete(ctx, req.CalendarType, req.Day); err != nil {
+			return commons.MakeRestError(err, "cant_delete_dictionary_entry")
+		}
+
+		return nil, nil
 	}
 }
 

@@ -81,7 +81,7 @@ X-Tenant-ID: default
 }
 
 ###
-# should fail but is is not!
+
 PUT http://localhost:9098/api/calendar/holidays
 Content-Type: application/json
 X-Tenant-ID: default
@@ -94,6 +94,14 @@ X-Tenant-ID: default
     "holliday_type": "church holiday"
   }
 }
+
+> {%
+client.test("Request should return status 400 because there is no item for 2021-04-30", function() {
+
+    var statusCode = response.status;
+    client.assert(statusCode === 400, "Expected response status 400 but but received '" + statusCode + "'");
+});
+%}
 
 ###
 
