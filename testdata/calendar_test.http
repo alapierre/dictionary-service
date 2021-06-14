@@ -1,3 +1,48 @@
+POST http://localhost:9098/api/calendar
+accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Polish Holidays",
+  "type": "holidays"
+}
+
+###
+
+POST http://localhost:9098/api/calendar
+accept: application/json
+Content-Type: application/json
+X-Tenant-ID: tenant1
+
+{
+  "name": "Polish Holidays for tenant1",
+  "type": "holidays"
+}
+
+###
+
+POST http://localhost:9098/api/calendar
+accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Nowy kalendarz",
+  "type": "new"
+}
+
+###
+
+PUT http://localhost:9098/api/calendar
+accept: application/json
+Content-Type: application/json
+
+{
+  "name": "coś innego",
+  "type": "new"
+}
+
+###
+
 GET http://localhost:9098/api/calendar
 accept: application/json
 X-Tenant-ID: default

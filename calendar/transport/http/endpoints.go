@@ -11,15 +11,6 @@ import (
 	"time"
 )
 
-// swagger:parameters loadCalendarTypes
-//goland:noinspection GoUnusedType
-type calendarTypeRequest struct {
-
-	// optional tenant id
-	// in:header
-	Tenant string `json:"X-Tenant-ID"`
-}
-
 // swagger:parameters loadCalendar
 type calendarRequest struct {
 
@@ -43,29 +34,6 @@ type calendarRequest struct {
 	Merge string `json:"X-Tenant-Merge-Default"`
 }
 
-type calendarResponse struct {
-	Day    string            `json:"day"`
-	Tenant string            `json:"tenant,omitempty"`
-	Name   *string           `json:"name"`
-	Kind   *string           `json:"kind,omitempty"`
-	Labels map[string]string `json:"labels,omitempty"`
-}
-
-//swagger:response calendarResponse
-//goland:noinspection GoUnusedType
-type calendarResponseWrapper struct {
-	// in:body
-	Body calendarResponse
-}
-
-//swagger:response calendarTypeResponse
-//goland:noinspection GoUnusedType
-type calendarTypeResponseWrapper struct {
-
-	// in:body
-	Body []calendar.DictionaryCalendarType
-}
-
 // swagger:parameters deleteCalendar
 type calendarDelete struct {
 
@@ -81,26 +49,6 @@ type calendarDelete struct {
 	Tenant string `json:"X-Tenant-ID"`
 }
 
-// swagger:parameters saveCalendar updateCalendar
-type SaveDtoWrapper struct {
-
-	// Calendar type id
-	// in:path
-	Type string `json:"type"`
-
-	// optional tenant id
-	// in:header
-	Tenant string `json:"X-Tenant-ID"`
-
-	// should combine response with given and default tenant
-	// in:header
-	Merge string `json:"X-Tenant-Merge-Default"`
-
-	// Calendar body
-	// in:body
-	Body calendar.SaveDto
-}
-
 func MakeLoadCalendarTypesEndpoint(service calendar.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
@@ -110,6 +58,34 @@ func MakeLoadCalendarTypesEndpoint(service calendar.Service) endpoint.Endpoint {
 		}
 
 		return cal, nil
+	}
+}
+
+func MakeCreateCalendarTypesEndpoint(service calendar.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(calendar.DictionaryCalendarType)
+		err := service.SaveType(ctx, &req)
+
+		if err != nil {
+			return commons.MakeRestError(err, "cant_create_new_dictionary_entry")
+		}
+
+		return nil, nil
+	}
+}
+
+func MakeUpdateCalendarTypesEndpoint(service calendar.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(calendar.DictionaryCalendarType)
+		err := service.UpdateType(ctx, &req)
+
+		if err != nil {
+			return commons.MakeRestError(err, "cant_create_new_dictionary_entry")
+		}
+
+		return nil, nil
 	}
 }
 
@@ -199,12 +175,34 @@ func DecodeSaveCalendarRequest(_ context.Context, r *http.Request) (interface{},
 	return request, nil
 }
 
+func DecodeSaveCalendarTypeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	var request calendar.DictionaryCalendarType
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	return request, nil
+}
+
 func MakeDeleteCalendar(service calendar.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(calendarDelete)
 
 		if err := service.Delete(ctx, req.CalendarType, req.Day); err != nil {
 			return commons.MakeRestError(err, "cant_delete_dictionary_entry")
+		}
+
+		return nil, nil
+	}
+}
+
+func MakeDeleteCalendarType(service calendar.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(calendarTypeDeleteWrapper)
+
+		if err := service.DeleteType(ctx, req.Type); err != nil {
+			return commons.MakeRestError(err, "cant_delete_calendar_type")
 		}
 
 		return nil, nil
@@ -223,5 +221,12 @@ func DecodeDeleteCalendarRequest(_ context.Context, r *http.Request) (interface{
 	return calendarDelete{
 		Day:          day,
 		CalendarType: vars["type"],
+	}, nil
+}
+
+func DecodeDeleteCalendarTypeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	return calendarTypeDeleteWrapper{
+		Type: vars["type"],
 	}, nil
 }

@@ -23,6 +23,42 @@ func makeCalendarEndpoints(r *mux.Router, service calendar.Service) {
 		common.EncodeResponse,
 	))
 
+	// swagger:route POST /api/calendar saveCalendarType
+	//
+	// Create new calendar type
+	//     Responses:
+	//       201:
+	//       400: RestError
+	r.Methods("POST", "OPTIONS").Path("/api/calendar").Handler(http.NewServer(
+		rest.MakeCreateCalendarTypesEndpoint(service),
+		rest.DecodeSaveCalendarTypeRequest,
+		common.EncodeWithStatus(201),
+	))
+
+	// swagger:route DELETE /api/calendar/{type} deleteCalendarType
+	//
+	// Delete calendar type - will work only if no any calendar items for this type exist
+	//     Responses:
+	//       204:
+	//       400: RestError
+	r.Methods("DELETE", "OPTIONS").Path("/api/calendar/{type}").Handler(http.NewServer(
+		rest.MakeDeleteCalendarType(service),
+		rest.DecodeDeleteCalendarTypeRequest,
+		common.EncodeWithStatus(204),
+	))
+
+	// swagger:route PUT /api/calendar updateCalendarType
+	//
+	// Create new calendar type
+	//     Responses:
+	//       204:
+	//       400: RestError
+	r.Methods("PUT", "OPTIONS").Path("/api/calendar").Handler(http.NewServer(
+		rest.MakeUpdateCalendarTypesEndpoint(service),
+		rest.DecodeSaveCalendarTypeRequest,
+		common.EncodeWithStatus(204),
+	))
+
 	// swagger:route GET /api/calendar/{calendarType}/{from}/{to} loadCalendar
 	//
 	// Loads all calendar items for given type and date range

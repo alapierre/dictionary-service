@@ -22,6 +22,9 @@ type Service interface {
 	Update(ctx context.Context, calendar *SaveDto) error
 	Delete(ctx context.Context, calendarType string, day time.Time) error
 	LoadTypes(ctx context.Context) ([]DictionaryCalendarType, error)
+	SaveType(ctx context.Context, calendarType *DictionaryCalendarType) error
+	UpdateType(ctx context.Context, calendarType *DictionaryCalendarType) error
+	DeleteType(ctx context.Context, calendarType string) error
 }
 
 func (s *service) Save(ctx context.Context, calendar *SaveDto) error {
@@ -55,15 +58,15 @@ func (s *service) SaveType(ctx context.Context, calendarType *DictionaryCalendar
 	return s.typeRepository.Save(calendarType)
 }
 
-func mapCalendar(calendar *SaveDto, t tenant.Tenant) *DictionaryCalendar {
-	return &DictionaryCalendar{
-		Day:    time.Time(calendar.Day),
-		Tenant: t.Name,
-		Name:   &calendar.Name,
-		Type:   calendar.CalendarType,
-		Kind:   calendar.Kind,
-		Labels: calendar.Labels,
+func (s *service) UpdateType(ctx context.Context, calendarType *DictionaryCalendarType) error {
+
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("can't read tenant from context")
 	}
+
+	calendarType.Tenant = t.Name
+	return s.typeRepository.Update(calendarType)
 }
 
 func (s *service) Delete(ctx context.Context, calendarType string, day time.Time) error {
@@ -72,6 +75,14 @@ func (s *service) Delete(ctx context.Context, calendarType string, day time.Time
 		return fmt.Errorf("can't read tenant from context")
 	}
 	return s.repository.Delete(t.Name, calendarType, day)
+}
+
+func (s *service) DeleteType(ctx context.Context, calendarType string) error {
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("can't read tenant from context")
+	}
+	return s.typeRepository.Delete(t.Name, calendarType)
 }
 
 func (s *service) LoadByTypeAndRange(ctx context.Context, calendarType string, from, to time.Time) ([]DictionaryCalendar, error) {
@@ -96,6 +107,17 @@ func (s *service) LoadTypes(ctx context.Context) ([]DictionaryCalendarType, erro
 	}
 
 	return s.typeRepository.LoadAll(t.Name)
+}
+
+func mapCalendar(calendar *SaveDto, t tenant.Tenant) *DictionaryCalendar {
+	return &DictionaryCalendar{
+		Day:    time.Time(calendar.Day),
+		Tenant: t.Name,
+		Name:   &calendar.Name,
+		Type:   calendar.CalendarType,
+		Kind:   calendar.Kind,
+		Labels: calendar.Labels,
+	}
 }
 
 func (s *service) mergeByTypeAndRange(tenant, calendarType string, from, to time.Time) ([]DictionaryCalendar, error) {

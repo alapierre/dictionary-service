@@ -101,6 +101,44 @@ paths:
           $ref: '#/responses/calendarTypeResponse'
         "400":
           $ref: '#/responses/RestError'
+    post:
+      description: Create new calendar type
+      operationId: saveCalendarType
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: Calendar type body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/DictionaryCalendarType'
+      responses:
+        "201":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+    put:
+      description: Create new calendar type
+      operationId: updateCalendarType
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: Calendar type body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/DictionaryCalendarType'
+      responses:
+        "204":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
   /api/calendar/{calendarType}/{from}/{to}:
     get:
       description: Loads all calendar items for given type and date range
@@ -139,6 +177,25 @@ paths:
         "400":
           $ref: '#/responses/RestError'
   /api/calendar/{type}:
+    delete:
+      description: Create new calendar type
+      operationId: deleteCalendarType
+      parameters:
+      - in: path
+        name: type
+        required: true
+        type: string
+        x-go-name: Type
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      responses:
+        "204":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
     post:
       description: Create new calendar item for given type and day
       operationId: saveCalendar
@@ -154,11 +211,6 @@ paths:
         name: X-Tenant-ID
         type: string
         x-go-name: Tenant
-      - description: should combine response with given and default tenant
-        in: header
-        name: X-Tenant-Merge-Default
-        type: string
-        x-go-name: Merge
       - description: Calendar body
         in: body
         name: Body
@@ -184,11 +236,6 @@ paths:
         name: X-Tenant-ID
         type: string
         x-go-name: Tenant
-      - description: should combine response with given and default tenant
-        in: header
-        name: X-Tenant-Merge-Default
-        type: string
-        x-go-name: Merge
       - description: Calendar body
         in: body
         name: Body
@@ -279,6 +326,9 @@ responses:
     description: ""
     schema:
       $ref: '#/definitions/calendarResponse'
+      additionalProperties:
+        type: string
+      type: object
   calendarTypeResponse:
     description: ""
     schema:
