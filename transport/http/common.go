@@ -11,6 +11,12 @@ import (
 	"reflect"
 )
 
+func EmptyRequest() func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
+	return func(ctx context.Context, request2 *http.Request) (request interface{}, err error) {
+		return nil, nil
+	}
+}
+
 func convertRequestToDictionary(req saveDictionaryRequest, tenant string) *model.ParentDictionary {
 	var children []model.ChildDictionary
 
@@ -82,14 +88,8 @@ func MakeRestError(err error, message string) (interface{}, error) {
 }
 
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	headers := w.Header()
-	headers.Set("Content-Type", "application/json; charset=utf-8")
-	headers.Set("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
-	headers.Set("X-Content-Type-Options", "nosniff")
-	headers.Set("X-XSS-Protection", "1; mode=block")
-	headers.Set("Pragma", "no-cache")
-	headers.Set("Expires", "0")
-	headers.Set("X-Frame-Options", "DENY")
+
+	prepareHeaders(w.Header())
 
 	if _, err := response.(*RestError); err {
 		w.WriteHeader(http.StatusBadRequest)
@@ -107,14 +107,8 @@ func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface
 }
 
 func EncodeSavedResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	headers := w.Header()
-	headers.Set("Content-Type", "application/json; charset=utf-8")
-	headers.Set("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
-	headers.Set("X-Content-Type-Options", "nosniff")
-	headers.Set("X-XSS-Protection", "1; mode=block")
-	headers.Set("Pragma", "no-cache")
-	headers.Set("Expires", "0")
-	headers.Set("X-Frame-Options", "DENY")
+
+	prepareHeaders(w.Header())
 
 	if _, err := response.(*RestError); err {
 		w.WriteHeader(http.StatusBadRequest)
@@ -123,4 +117,45 @@ func EncodeSavedResponse(_ context.Context, w http.ResponseWriter, response inte
 	}
 
 	return json.NewEncoder(w).Encode(response)
+}
+
+func EncodeWithStatus(status int) func(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	return func(_ context.Context, w http.ResponseWriter, response interface{}) error {
+
+		prepareHeaders(w.Header())
+
+		if _, err := response.(*RestError); err {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			w.WriteHeader(status)
+		}
+
+		// if nil - return empty response
+		if response == nil {
+			return nil
+		}
+
+		// empty slice or interface{}
+		if reflect.ValueOf(response).IsNil() {
+			rt := reflect.TypeOf(response)
+			switch rt.Kind() {
+			case reflect.Slice, reflect.Array:
+				return json.NewEncoder(w).Encode(make([]int, 0))
+			default:
+				return nil
+			}
+		}
+		// there is something to return
+		return json.NewEncoder(w).Encode(response)
+	}
+}
+
+func prepareHeaders(headers http.Header) {
+	headers.Set("Content-Type", "application/json; charset=utf-8")
+	headers.Set("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
+	headers.Set("X-Content-Type-Options", "nosniff")
+	headers.Set("X-XSS-Protection", "1; mode=block")
+	headers.Set("Pragma", "no-cache")
+	headers.Set("Expires", "0")
+	headers.Set("X-Frame-Options", "DENY")
 }

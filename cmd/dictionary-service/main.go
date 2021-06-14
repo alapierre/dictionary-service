@@ -24,19 +24,21 @@ import (
 )
 
 type Config struct {
-	ServerPort           int    `split_words:"true" default:"9098"`
-	DatasourceName       string `split_words:"true" default:"app"`
-	DatasourceSchema     string `split_words:"true" default:"dictionary"`
-	DatasourceHost       string `split_words:"true" default:"localhost:5432"`
-	DatasourceUser       string `required:"true" split_words:"true"`
-	DatasourcePassword   string `required:"true" split_words:"true"`
-	DatasourcePoolSize   int    `split_words:"true" default:"2"`
-	DatasourceMaxRetries int    `split_words:"true" default:"3"`
-	EurekaServiceUrl     string `split_words:"true" default:"http://localhost:8761/eureka"`
-	DefaultLanguage      string `split_words:"true" default:"en"`
-	InitDBConnectionRets int    `split_words:"true" default:"100"`
-	ShowSql              bool   `split_words:"true" default:"true"`
-	TenantHeaderName     string `split_words:"true" default:"X-Tenant-ID"`
+	ServerPort               int    `split_words:"true" default:"9098"`
+	DatasourceName           string `split_words:"true" default:"app"`
+	DatasourceSchema         string `split_words:"true" default:"dictionary"`
+	DatasourceHost           string `split_words:"true" default:"localhost:5432"`
+	DatasourceUser           string `required:"true" split_words:"true"`
+	DatasourcePassword       string `required:"true" split_words:"true"`
+	DatasourcePoolSize       int    `split_words:"true" default:"2"`
+	DatasourceMaxRetries     int    `split_words:"true" default:"3"`
+	EurekaServiceUrl         string `split_words:"true" default:"http://localhost:8761/eureka"`
+	DefaultLanguage          string `split_words:"true" default:"en"`
+	InitDBConnectionRets     int    `split_words:"true" default:"100"`
+	ShowSql                  bool   `split_words:"true" default:"true"`
+	TenantHeaderName         string `split_words:"true" default:"X-Tenant-ID"`
+	EnableEureka             bool   `split_words:"true" default:"true"`
+	AccessControlAllowOrigin string `split_words:"true" default:"*"`
 }
 
 var c Config
@@ -68,7 +70,7 @@ func main() {
 	configurationRepository := service.NewConfigurationRepository(db)
 	configurationService := service.NewConfigurationService(configurationRepository)
 
-	calendarService := calendar.NewService(calendar.NewRepository(db))
+	calendarService := calendar.NewService(calendar.NewRepository(db), calendar.NewTypeRepository(db))
 
 	r := mux.NewRouter()
 	r.Use(addContext, accessControlMiddleware)
@@ -80,13 +82,18 @@ func main() {
 	http.Handle("/", r)
 	slog.Info("Started on port ", c.ServerPort)
 
-	eurekaInstance, err := eureka.New().
-		Default(c.ServerPort, "").
-		Register(c.EurekaServiceUrl, "dictionary-service")
+	if c.EnableEureka {
 
-	util.FailOnError(err, "can't register with Eureka")
+		slog.Info("Registering into Eureka server")
 
-	defer eurekaInstance.Deregister()
+		eurekaInstance, err := eureka.New().
+			Default(c.ServerPort, "").
+			Register(c.EurekaServiceUrl, "dictionary-service")
+
+		util.FailOnError(err, "can't register with Eureka")
+
+		defer eurekaInstance.Deregister()
+	}
 
 	startHttpAndWaitForSigINT(c.ServerPort)
 
@@ -203,9 +210,9 @@ func addContext(next http.Handler) http.Handler {
 // access control and  CORS middleware
 func accessControlMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*") // TODO: do konfiguracji
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
+		w.Header().Set("Access-Control-Allow-Origin", c.AccessControlAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, X-Tenant-Merge-Default, "+c.TenantHeaderName)
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 
 		if r.Method == "OPTIONS" {
 			return
