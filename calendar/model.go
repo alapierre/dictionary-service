@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"dictionaries-service/types"
 	"time"
 )
 
@@ -18,13 +19,13 @@ type DictionaryCalendar struct {
 type DictionaryCalendarType struct {
 	tableName struct{} `pg:"calendar_type,alias:t,discard_unknown_columns"`
 
-	Type   string `pg:"type,pk"`
-	Name   string `pg:"name"`
-	Tenant string `pg:"tenant,pk,use_zero"`
+	Type   string `pg:"type,pk" json:"type"`
+	Name   string `pg:"name" json:"name"`
+	Tenant string `pg:"tenant,pk,use_zero" json:"-"`
 }
 
 type SaveDto struct {
-	Day          time.Time         `json:"-"`
+	Day          types.JsonDate    `json:"day"`
 	CalendarType string            `json:"-"`
 	Name         string            `json:"name"`
 	Kind         *string           `json:"kind,omitempty"`

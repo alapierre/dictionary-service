@@ -11,6 +11,15 @@ import (
 	"time"
 )
 
+// swagger:parameters loadCalendarTypes
+//goland:noinspection GoUnusedType
+type calendarTypeRequest struct {
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+}
+
 // swagger:parameters loadCalendar
 type calendarRequest struct {
 
@@ -43,9 +52,18 @@ type calendarResponse struct {
 }
 
 //swagger:response calendarResponse
+//goland:noinspection GoUnusedType
 type calendarResponseWrapper struct {
 	// in:body
 	Body calendarResponse
+}
+
+//swagger:response calendarTypeResponse
+//goland:noinspection GoUnusedType
+type calendarTypeResponseWrapper struct {
+
+	// in:body
+	Body []calendar.DictionaryCalendarType
 }
 
 // swagger:parameters deleteCalendar
@@ -68,12 +86,7 @@ type SaveDtoWrapper struct {
 
 	// Calendar type id
 	// in:path
-	Type string
-
-	// Day in calendar
-	// swagger:strfmt date
-	// in:path
-	Day time.Time
+	Type string `json:"type"`
 
 	// optional tenant id
 	// in:header
@@ -86,6 +99,18 @@ type SaveDtoWrapper struct {
 	// Calendar body
 	// in:body
 	Body calendar.SaveDto
+}
+
+func MakeLoadCalendarTypesEndpoint(service calendar.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		cal, err := service.LoadTypes(ctx)
+		if err != nil {
+			return commons.MakeRestError(err, "Can't load calendar types")
+		}
+
+		return cal, nil
+	}
 }
 
 func MakeLoadCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
@@ -153,7 +178,7 @@ func MakeUpdateCalendarEndpoint(service calendar.Service) endpoint.Endpoint {
 		err := service.Update(ctx, &req)
 
 		if err != nil {
-			return commons.MakeRestError(err, "cant_create_new_dictionary_entry")
+			return commons.MakeRestError(err, "cant_update_dictionary_entry")
 		}
 
 		return nil, nil
@@ -164,18 +189,12 @@ func DecodeSaveCalendarRequest(_ context.Context, r *http.Request) (interface{},
 
 	vars := mux.Vars(r)
 
-	day, err := time.Parse("2006-01-02", vars["day"])
-	if err != nil {
-		return nil, err
-	}
-
 	var request calendar.SaveDto
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
 
 	request.CalendarType = vars["type"]
-	request.Day = day
 
 	return request, nil
 }
@@ -183,7 +202,12 @@ func DecodeSaveCalendarRequest(_ context.Context, r *http.Request) (interface{},
 func MakeDeleteCalendar(service calendar.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(calendarDelete)
-		return nil, service.Delete(ctx, req.CalendarType, req.Day)
+
+		if err := service.Delete(ctx, req.CalendarType, req.Day); err != nil {
+			return commons.MakeRestError(err, "cant_delete_dictionary_entry")
+		}
+
+		return nil, nil
 	}
 }
 
