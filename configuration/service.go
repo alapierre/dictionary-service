@@ -24,6 +24,7 @@ type Service interface {
 	NewConfigValue(key, tenant, configType, name, value string) error
 	LoadMany(tenant string, day time.Time, keys ...string) []Configuration
 	LoadAllShort(ctx context.Context) ([]Short, error)
+	LoadValues(ctx context.Context, key string) ([]Configuration, error)
 }
 
 func (c *service) LoadForDay(key, tenant string, day time.Time) (*Configuration, error) {
@@ -58,6 +59,16 @@ func (c *service) LoadAllShort(ctx context.Context) ([]Short, error) {
 	}
 
 	return c.repository.LoadAllShort(t.Name)
+}
+
+func (c *service) LoadValues(ctx context.Context, key string) ([]Configuration, error) {
+
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("can't read tenant from context")
+	}
+
+	return c.repository.LoadValues(t.Name, key)
 }
 
 func (c *service) Save(conf *Configuration) error {

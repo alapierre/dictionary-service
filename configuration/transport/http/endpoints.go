@@ -5,6 +5,7 @@ import (
 	"dictionaries-service/configuration"
 	"dictionaries-service/tenant"
 	commons "dictionaries-service/transport/http"
+	"dictionaries-service/util"
 	"fmt"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/gorilla/mux"
@@ -21,6 +22,17 @@ type configurationArrayRequest struct {
 	Day time.Time `json:"day"`
 }
 
+// swagger:parameters loadValues
+type valuesRequest struct {
+
+	// in:path
+	Key string `json:"key"`
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+}
+
 // swagger:parameters loadConfig
 type configurationRequest struct {
 	// in:path
@@ -29,34 +41,17 @@ type configurationRequest struct {
 	Day time.Time `json:"day"`
 }
 
+type loadValueResponse struct {
+	Key      string    `json:"key"`
+	Value    *string   `json:"value"`
+	DateFrom time.Time `json:"date_from"`
+	DateTo   time.Time `json:"date_to"`
+}
+
 type loadConfigurationResponse struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 	Type  string  `json:"type"`
-}
-
-// swagger:response loadConfigurationResponse
-//goland:noinspection ALL
-type loadConfigurationResponseWrapper struct {
-
-	// in:body
-	Body []loadConfigurationResponse
-}
-
-// swagger:response loadShortResponseWrapper
-//goland:noinspection ALL
-type loadShortResponseWrapper struct {
-
-	// in:body
-	Body []configuration.Short
-}
-
-// swagger:response loadConfigurationOneResponseWrapper
-//goland:noinspection ALL
-type loadConfigurationOneResponseWrapper struct {
-
-	// in:body
-	Body loadConfigurationResponse
 }
 
 func MakeLoadAllShortEndpoint(configurationService configuration.Service) endpoint.Endpoint {
@@ -69,6 +64,36 @@ func MakeLoadAllShortEndpoint(configurationService configuration.Service) endpoi
 
 		return short, nil
 	}
+}
+
+func MakeLoadValuesEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(valuesRequest)
+
+		values, err := configurationService.LoadValues(ctx, req.Key)
+		if err != nil {
+			return commons.MakeRestError(err, "cant_delete_dictionary_entry")
+		}
+
+		var res []loadValueResponse
+
+		for _, v := range values {
+			res = append(res, loadValueResponse{
+				Key:      v.Key,
+				Value:    util.SqlNullStringToStringPointer(v.Value),
+				DateFrom: v.DateFrom,
+				DateTo:   v.DateTo,
+			})
+		}
+
+		return res, nil
+	}
+}
+
+func DecodeLoadValuesRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	return valuesRequest{Key: vars["key"]}, nil
 }
 
 func MakeLoadConfigurationArrayEndpoint(configurationService configuration.Service) endpoint.Endpoint {

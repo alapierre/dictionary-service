@@ -23,6 +23,16 @@ Accept: application/json
 ###
 
 GET http://localhost:9098/api/config
+X-Tenant-ID: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+
+
+###
+
+GET http://localhost:9098/api/config/smtp.server.host
+X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json

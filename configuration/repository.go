@@ -17,6 +17,7 @@ type Repository interface {
 	Load(key, tenant string, from, to time.Time) ([]Configuration, error)
 	Save(configuration *Configuration) error
 	LoadAllShort(tenant string) ([]Short, error)
+	LoadValues(tenant, key string) ([]Configuration, error)
 }
 
 type configurationRepository struct {
@@ -51,5 +52,14 @@ func (c *configurationRepository) Save(configuration *Configuration) error {
 func (c *configurationRepository) LoadAllShort(tenant string) ([]Short, error) {
 	var result []Short
 	_, err := c.db.Query(&result, `select distinct key, name, type from configuration where tenant = ?`, tenant)
+	return result, err
+}
+
+func (c *configurationRepository) LoadValues(tenant, key string) ([]Configuration, error) {
+	var result []Configuration
+	err := c.db.Model(&result).
+		Where("key = ? and tenant = ?", key, tenant).
+		Select()
+
 	return result, err
 }

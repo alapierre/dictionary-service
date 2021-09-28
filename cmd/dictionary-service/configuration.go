@@ -10,6 +10,18 @@ import (
 
 func makeConfigurationEndpoints(r *mux.Router, configurationService configuration.Service) {
 
+	// swagger:route GET /api/config/{key} loadValues
+	//
+	// Loads all config for given key
+	//     Responses:
+	//       200: loadValuesResponseWrapper
+	//       400: RestError
+	r.Methods("GET", "OPTIONS").Path("/api/config/{key}").Handler(http.NewServer(
+		rest.MakeLoadValuesEndpoint(configurationService),
+		rest.DecodeLoadValuesRequest,
+		common.EncodeResponse,
+	))
+
 	// swagger:route GET /api/config loadAllConfigKeys
 	//
 	// Loads all unique config keys, name and type

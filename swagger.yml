@@ -88,6 +88,24 @@ definitions:
         x-go-name: Value
     type: object
     x-go-package: dictionaries-service/configuration/transport/http
+  loadValueResponse:
+    properties:
+      date_from:
+        format: date-time
+        type: string
+        x-go-name: DateFrom
+      date_to:
+        format: date-time
+        type: string
+        x-go-name: DateTo
+      key:
+        type: string
+        x-go-name: Key
+      value:
+        type: string
+        x-go-name: Value
+    type: object
+    x-go-package: dictionaries-service/configuration/transport/http
 host: localhost:9098
 info:
   description: |-
@@ -290,9 +308,35 @@ paths:
     get:
       description: Loads all unique config keys, name and type
       operationId: loadAllConfigKeys
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
       responses:
         "200":
           $ref: '#/responses/loadShortResponseWrapper'
+        "400":
+          $ref: '#/responses/RestError'
+  /api/config/{key}:
+    get:
+      description: Loads all config for given key
+      operationId: loadValues
+      parameters:
+      - in: path
+        name: key
+        required: true
+        type: string
+        x-go-name: Key
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      responses:
+        "200":
+          $ref: '#/responses/loadValuesResponseWrapper'
         "400":
           $ref: '#/responses/RestError'
   /api/config/{key}/{day}:
@@ -373,6 +417,12 @@ responses:
     schema:
       items:
         $ref: '#/definitions/Short'
+      type: array
+  loadValuesResponseWrapper:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/loadValueResponse'
       type: array
 schemes:
 - http

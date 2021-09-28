@@ -1,6 +1,7 @@
 package util
 
 import (
+	"database/sql"
 	"github.com/go-eden/slf4go"
 	"github.com/go-pg/pg/v10"
 )
@@ -38,4 +39,13 @@ func DoInTransaction(db *pg.DB, callback TransactionCallback) error {
 	}
 	err = tx.Commit()
 	return err
+}
+
+func SqlNullStringToStringPointer(str sql.NullString) *string {
+	if str.Valid {
+		tmp := str.String
+		return &tmp
+	} else {
+		return nil
+	}
 }
