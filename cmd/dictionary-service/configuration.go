@@ -10,6 +10,30 @@ import (
 
 func makeConfigurationEndpoints(r *mux.Router, configurationService configuration.Service) {
 
+	// swagger:route PUT /api/config updateConfiguration
+	//
+	// Save new config value
+	//     Responses:
+	//       201:
+	//       400: RestError
+	r.Methods("PUT", "OPTIONS").Path("/api/config").Handler(http.NewServer(
+		rest.MakeUpdateConfigurationEndpoint(configurationService),
+		rest.DecodeSaveConfigurationRequest,
+		common.EncodeWithStatus(204),
+	))
+
+	// swagger:route POST /api/config saveConfiguration
+	//
+	// Save new config value
+	//     Responses:
+	//       201:
+	//       400: RestError
+	r.Methods("POST", "OPTIONS").Path("/api/config").Handler(http.NewServer(
+		rest.MakeSaveConfigurationEndpoint(configurationService),
+		rest.DecodeSaveConfigurationRequest,
+		common.EncodeWithStatus(201),
+	))
+
 	// swagger:route GET /api/config/{key} loadValues
 	//
 	// Loads all config for given key

@@ -25,6 +25,7 @@ type Service interface {
 	LoadMany(tenant string, day time.Time, keys ...string) []Configuration
 	LoadAllShort(ctx context.Context) ([]Short, error)
 	LoadValues(ctx context.Context, key string) ([]Configuration, error)
+	Update(configuration *Configuration) error
 }
 
 func (c *service) LoadForDay(key, tenant string, day time.Time) (*Configuration, error) {
@@ -73,6 +74,10 @@ func (c *service) LoadValues(ctx context.Context, key string) ([]Configuration, 
 
 func (c *service) Save(conf *Configuration) error {
 	return c.repository.Save(conf)
+}
+
+func (c *service) Update(configuration *Configuration) error {
+	return c.repository.Update(configuration)
 }
 
 func (c *service) NewConfigValue(key, tenant, configType, name, value string) error {

@@ -1,6 +1,8 @@
 package configuration
 
 import (
+	"dictionaries-service/util"
+	"fmt"
 	"github.com/go-pg/pg/v10"
 	"time"
 )
@@ -18,6 +20,7 @@ type Repository interface {
 	Save(configuration *Configuration) error
 	LoadAllShort(tenant string) ([]Short, error)
 	LoadValues(tenant, key string) ([]Configuration, error)
+	Update(configuration *Configuration) error
 }
 
 type configurationRepository struct {
@@ -47,6 +50,20 @@ func (c *configurationRepository) Load(key, tenant string, from, to time.Time) (
 func (c *configurationRepository) Save(configuration *Configuration) error {
 	_, err := c.db.Model(configuration).Insert()
 	return err
+}
+
+func (c *configurationRepository) Update(configuration *Configuration) error {
+
+	res, err := c.db.Model(configuration).WherePK().Update()
+
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return util.NewZeroRowsAffectedError(fmt.Errorf("there is no row for geven dateFrom: %s, type: %s and tenant: %s",
+			configuration.DateFrom, configuration.Key, configuration.Tenant))
+	}
+	return nil
 }
 
 func (c *configurationRepository) LoadAllShort(tenant string) ([]Short, error) {

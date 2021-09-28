@@ -6,6 +6,7 @@ import (
 	"dictionaries-service/tenant"
 	commons "dictionaries-service/transport/http"
 	"dictionaries-service/util"
+	"encoding/json"
 	"fmt"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/gorilla/mux"
@@ -41,6 +42,15 @@ type configurationRequest struct {
 	Day time.Time `json:"day"`
 }
 
+type saveConfigurationRequest struct {
+	Key      string    `json:"key"`
+	Value    *string   `json:"value"`
+	Type     string    `json:"type"`
+	Name     string    `json:"name"`
+	DateFrom time.Time `json:"date_from"`
+	DateTo   time.Time `json:"date_to"`
+}
+
 type loadValueResponse struct {
 	Key      string    `json:"key"`
 	Value    *string   `json:"value"`
@@ -52,6 +62,63 @@ type loadConfigurationResponse struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 	Type  string  `json:"type"`
+}
+
+func MakeUpdateConfigurationEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(saveConfigurationRequest)
+
+		t, ok := tenant.FromContext(ctx)
+		if !ok {
+			return commons.MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		}
+
+		err := configurationService.Update(&configuration.Configuration{
+			Key:      req.Key,
+			Tenant:   t.Name,
+			Type:     req.Type,
+			Name:     req.Name,
+			Value:    util.PointerToSqlNullString(req.Value),
+			DateFrom: req.DateFrom,
+			DateTo:   req.DateTo,
+		})
+		return nil, err
+	}
+}
+
+func MakeSaveConfigurationEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(saveConfigurationRequest)
+
+		t, ok := tenant.FromContext(ctx)
+		if !ok {
+			return commons.MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+		}
+
+		err := configurationService.Save(&configuration.Configuration{
+			Key:      req.Key,
+			Tenant:   t.Name,
+			Type:     req.Type,
+			Name:     req.Name,
+			Value:    util.PointerToSqlNullString(req.Value),
+			DateFrom: req.DateFrom,
+			DateTo:   req.DateTo,
+		})
+
+		return nil, err
+	}
+}
+
+func DecodeSaveConfigurationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	var request saveConfigurationRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	return request, nil
 }
 
 func MakeLoadAllShortEndpoint(configurationService configuration.Service) endpoint.Endpoint {

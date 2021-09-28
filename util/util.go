@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/go-eden/slf4go"
 	"github.com/go-pg/pg/v10"
+	"time"
 )
 
 func FailOnError(err error, msg string) {
@@ -48,4 +49,21 @@ func SqlNullStringToStringPointer(str sql.NullString) *string {
 	} else {
 		return nil
 	}
+}
+
+func PointerToSqlNullString(str *string) sql.NullString {
+
+	if str == nil {
+		return sql.NullString{Valid: false}
+	}
+
+	return sql.NullString{
+		String: *str,
+		Valid:  true,
+	}
+}
+
+func StringToTime(str string) (time.Time, error) {
+	layout := "2006-01-02T15:04:05.000Z"
+	return time.Parse(layout, str)
 }

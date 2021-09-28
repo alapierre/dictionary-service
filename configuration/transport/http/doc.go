@@ -2,6 +2,32 @@ package http
 
 import "dictionaries-service/configuration"
 
+// swagger:parameters updateConfiguration
+//goland:noinspection GoUnusedType
+type updateConfigurationRequestWrapper struct {
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+
+	// Configuration body
+	// in:body
+	Body saveConfigurationRequest
+}
+
+// swagger:parameters saveConfiguration
+//goland:noinspection GoUnusedType
+type saveConfigurationRequestWrapper struct {
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+
+	// Configuration body
+	// in:body
+	Body saveConfigurationRequest
+}
+
 // swagger:parameters loadAllConfigKeys
 //goland:noinspection GoUnusedType
 type loadAllShortRequest struct {
