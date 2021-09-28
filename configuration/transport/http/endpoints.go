@@ -83,6 +83,11 @@ func MakeUpdateConfigurationEndpoint(configurationService configuration.Service)
 			DateFrom: req.DateFrom,
 			DateTo:   req.DateTo,
 		})
+
+		if err != nil {
+			return commons.MakeRestError(err, "cant_update_config_entry")
+		}
+
 		return nil, err
 	}
 }
@@ -106,6 +111,10 @@ func MakeSaveConfigurationEndpoint(configurationService configuration.Service) e
 			DateFrom: req.DateFrom,
 			DateTo:   req.DateTo,
 		})
+
+		if err != nil {
+			return commons.MakeRestError(err, "cant_save_config_entry")
+		}
 
 		return nil, err
 	}
