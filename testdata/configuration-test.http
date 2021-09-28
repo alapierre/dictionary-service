@@ -19,3 +19,10 @@ X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json
+
+###
+
+GET http://localhost:9098/api/config
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json

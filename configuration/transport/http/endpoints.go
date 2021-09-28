@@ -2,8 +2,9 @@ package http
 
 import (
 	"context"
-	"dictionaries-service/service"
+	"dictionaries-service/configuration"
 	"dictionaries-service/tenant"
+	commons "dictionaries-service/transport/http"
 	"fmt"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/gorilla/mux"
@@ -20,12 +21,62 @@ type configurationArrayRequest struct {
 	Day time.Time `json:"day"`
 }
 
-func MakeLoadConfigurationArrayEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {
+// swagger:parameters loadConfig
+type configurationRequest struct {
+	// in:path
+	Key string `json:"key"`
+	// in:path
+	Day time.Time `json:"day"`
+}
+
+type loadConfigurationResponse struct {
+	Key   string  `json:"key"`
+	Value *string `json:"value"`
+	Type  string  `json:"type"`
+}
+
+// swagger:response loadConfigurationResponse
+//goland:noinspection ALL
+type loadConfigurationResponseWrapper struct {
+
+	// in:body
+	Body []loadConfigurationResponse
+}
+
+// swagger:response loadShortResponseWrapper
+//goland:noinspection ALL
+type loadShortResponseWrapper struct {
+
+	// in:body
+	Body []configuration.Short
+}
+
+// swagger:response loadConfigurationOneResponseWrapper
+//goland:noinspection ALL
+type loadConfigurationOneResponseWrapper struct {
+
+	// in:body
+	Body loadConfigurationResponse
+}
+
+func MakeLoadAllShortEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		short, err := configurationService.LoadAllShort(ctx)
+		if err != nil {
+			return commons.MakeRestError(err, "cant_delete_dictionary_entry")
+		}
+
+		return short, nil
+	}
+}
+
+func MakeLoadConfigurationArrayEndpoint(configurationService configuration.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
 		t, ok := tenant.FromContext(ctx)
 		if !ok {
-			return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+			return commons.MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 		}
 
 		req := request.(configurationArrayRequest)
@@ -70,40 +121,12 @@ func DecodeLoadConfigurationArrayRequest(_ context.Context, r *http.Request) (in
 	}, nil
 }
 
-// swagger:parameters loadConfig
-type configurationRequest struct {
-	// in:path
-	Key string `json:"key"`
-	// in:path
-	Day time.Time `json:"day"`
-}
-
-type loadConfigurationResponse struct {
-	Key   string  `json:"key"`
-	Value *string `json:"value"`
-	Type  string  `json:"type"`
-}
-
-// swagger:response loadConfigurationResponse
-type loadConfigurationResponseWrapper struct {
-
-	// in:body
-	Body []loadConfigurationResponse
-}
-
-// swagger:response loadConfigurationOneResponseWrapper
-type loadConfigurationOneResponseWrapper struct {
-
-	// in:body
-	Body loadConfigurationResponse
-}
-
-func MakeLoadConfigurationEndpoint(configurationService service.ConfigurationService) endpoint.Endpoint {
+func MakeLoadConfigurationEndpoint(configurationService configuration.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
 		t, ok := tenant.FromContext(ctx)
 		if !ok {
-			return MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
+			return commons.MakeRestError(fmt.Errorf("can't extract tenant from context"), "cant_extract_tenant_from_context")
 		}
 
 		req := request.(configurationRequest)
@@ -111,7 +134,7 @@ func MakeLoadConfigurationEndpoint(configurationService service.ConfigurationSer
 		r, err := configurationService.LoadForDay(req.Key, t.Name, req.Day)
 
 		if err != nil {
-			return MakeRestError(err, "cant_load_configuration_by_key_tenant_and_day")
+			return commons.MakeRestError(err, "cant_load_configuration_by_key_tenant_and_day")
 		}
 
 		var value *string
