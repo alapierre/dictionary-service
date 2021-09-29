@@ -5,6 +5,7 @@ import (
 	"dictionaries-service/configuration"
 	"dictionaries-service/tenant"
 	commons "dictionaries-service/transport/http"
+	"dictionaries-service/types"
 	"dictionaries-service/util"
 	"encoding/json"
 	"fmt"
@@ -43,12 +44,12 @@ type configurationRequest struct {
 }
 
 type saveConfigurationRequest struct {
-	Key      string    `json:"key"`
-	Value    *string   `json:"value"`
-	Type     string    `json:"type"`
-	Name     string    `json:"name"`
-	DateFrom time.Time `json:"date_from"`
-	DateTo   time.Time `json:"date_to"`
+	Key      string         `json:"key"`
+	Value    *string        `json:"value"`
+	Type     string         `json:"type"`
+	Name     string         `json:"name"`
+	DateFrom types.JsonDate `json:"date_from"`
+	DateTo   types.JsonDate `json:"date_to"`
 }
 
 type loadValueResponse struct {
@@ -80,8 +81,8 @@ func MakeUpdateConfigurationEndpoint(configurationService configuration.Service)
 			Type:     req.Type,
 			Name:     req.Name,
 			Value:    util.PointerToSqlNullString(req.Value),
-			DateFrom: req.DateFrom,
-			DateTo:   req.DateTo,
+			DateFrom: req.DateFrom.Time(),
+			DateTo:   req.DateTo.Time(),
 		})
 
 		if err != nil {
@@ -108,8 +109,8 @@ func MakeSaveConfigurationEndpoint(configurationService configuration.Service) e
 			Type:     req.Type,
 			Name:     req.Name,
 			Value:    util.PointerToSqlNullString(req.Value),
-			DateFrom: req.DateFrom,
-			DateTo:   req.DateTo,
+			DateFrom: req.DateFrom.Time(),
+			DateTo:   req.DateTo.Time(),
 		})
 
 		if err != nil {

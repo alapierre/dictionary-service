@@ -109,11 +109,11 @@ definitions:
   saveConfigurationRequest:
     properties:
       date_from:
-        format: date-time
+        format: date
         type: string
         x-go-name: DateFrom
       date_to:
-        format: date-time
+        format: date
         type: string
         x-go-name: DateTo
       key:

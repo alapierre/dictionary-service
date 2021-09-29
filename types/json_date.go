@@ -34,3 +34,7 @@ func (j JsonDate) Format(layout string) string {
 func (j JsonDate) String() string {
 	return j.Format("2006-01-02")
 }
+
+func (j JsonDate) Time() time.Time {
+	return time.Time(j)
+}
