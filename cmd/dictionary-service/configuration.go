@@ -1,24 +1,73 @@
 package main
 
 import (
-	"dictionaries-service/service"
-	rest "dictionaries-service/transport/http"
+	"dictionaries-service/configuration"
+	rest "dictionaries-service/configuration/transport/http"
+	common "dictionaries-service/transport/http"
 	"github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 )
 
-func makeConfigurationEndpoints(r *mux.Router, configurationService service.ConfigurationService) {
+func makeConfigurationEndpoints(r *mux.Router, configurationService configuration.Service) {
+
+	// swagger:route PUT /api/config updateConfiguration
+	//
+	// Save new config value
+	//     Responses:
+	//       201:
+	//       400: RestError
+	r.Methods("PUT", "OPTIONS").Path("/api/config").Handler(http.NewServer(
+		rest.MakeUpdateConfigurationEndpoint(configurationService),
+		rest.DecodeSaveConfigurationRequest,
+		common.EncodeWithStatus(204),
+	))
+
+	// swagger:route POST /api/config saveConfiguration
+	//
+	// Save new config value
+	//     Responses:
+	//       201:
+	//       400: RestError
+	r.Methods("POST", "OPTIONS").Path("/api/config").Handler(http.NewServer(
+		rest.MakeSaveConfigurationEndpoint(configurationService),
+		rest.DecodeSaveConfigurationRequest,
+		common.EncodeWithStatus(201),
+	))
+
+	// swagger:route GET /api/config/{key} loadValues
+	//
+	// Loads all config for given key
+	//     Responses:
+	//       200: loadValuesResponseWrapper
+	//       400: RestError
+	r.Methods("GET", "OPTIONS").Path("/api/config/{key}").Handler(http.NewServer(
+		rest.MakeLoadValuesEndpoint(configurationService),
+		rest.DecodeLoadValuesRequest,
+		common.EncodeResponse,
+	))
+
+	// swagger:route GET /api/config loadAllConfigKeys
+	//
+	// Loads all unique config keys, name and type
+	//     Responses:
+	//       200: loadShortResponseWrapper
+	//       400: RestError
+	r.Methods("GET", "OPTIONS").Path("/api/config").Handler(http.NewServer(
+		rest.MakeLoadAllShortEndpoint(configurationService),
+		common.EmptyRequest(),
+		common.EncodeResponse,
+	))
 
 	// swagger:route GET /api/config/{key}/{day} loadConfig
 	//
-	// Loads all calendar items for given type and date range
+	// Loads config value for given kay and day
 	//     Responses:
 	//       200: loadConfigurationOneResponseWrapper
 	//       400: RestError
 	r.Methods("GET", "OPTIONS").Path("/api/config/{key}/{day}").Handler(http.NewServer(
 		rest.MakeLoadConfigurationEndpoint(configurationService),
 		rest.DecodeLoadConfigurationRequest,
-		rest.EncodeResponse,
+		common.EncodeResponse,
 	))
 
 	// swagger:route GET /api/configs/{day} loadConfigForKeys
@@ -30,6 +79,6 @@ func makeConfigurationEndpoints(r *mux.Router, configurationService service.Conf
 	r.Methods("GET", "OPTIONS").Path("/api/configs/{day}").Handler(http.NewServer(
 		rest.MakeLoadConfigurationArrayEndpoint(configurationService),
 		rest.DecodeLoadConfigurationArrayRequest,
-		rest.EncodeResponse,
+		common.EncodeResponse,
 	))
 }

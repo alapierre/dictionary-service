@@ -41,6 +41,19 @@ definitions:
         x-go-name: Name
     type: object
     x-go-package: dictionaries-service/calendar
+  Short:
+    properties:
+      key:
+        type: string
+        x-go-name: Key
+      name:
+        type: string
+        x-go-name: Name
+      type:
+        type: string
+        x-go-name: Type
+    type: object
+    x-go-package: dictionaries-service/configuration
   calendarResponse:
     properties:
       day:
@@ -74,7 +87,49 @@ definitions:
         type: string
         x-go-name: Value
     type: object
-    x-go-package: dictionaries-service/transport/http
+    x-go-package: dictionaries-service/configuration/transport/http
+  loadValueResponse:
+    properties:
+      date_from:
+        format: date-time
+        type: string
+        x-go-name: DateFrom
+      date_to:
+        format: date-time
+        type: string
+        x-go-name: DateTo
+      key:
+        type: string
+        x-go-name: Key
+      value:
+        type: string
+        x-go-name: Value
+    type: object
+    x-go-package: dictionaries-service/configuration/transport/http
+  saveConfigurationRequest:
+    properties:
+      date_from:
+        format: date-time
+        type: string
+        x-go-name: DateFrom
+      date_to:
+        format: date-time
+        type: string
+        x-go-name: DateTo
+      key:
+        type: string
+        x-go-name: Key
+      name:
+        type: string
+        x-go-name: Name
+      type:
+        type: string
+        x-go-name: Type
+      value:
+        type: string
+        x-go-name: Value
+    type: object
+    x-go-package: dictionaries-service/configuration/transport/http
 host: localhost:9098
 info:
   description: |-
@@ -178,7 +233,8 @@ paths:
           $ref: '#/responses/RestError'
   /api/calendar/{type}:
     delete:
-      description: Create new calendar type
+      description: Delete calendar type - will work only if no any calendar items
+        for this type exist
       operationId: deleteCalendarType
       parameters:
       - in: path
@@ -272,9 +328,82 @@ paths:
           description: ""
         "400":
           $ref: '#/responses/RestError'
+  /api/config:
+    get:
+      description: Loads all unique config keys, name and type
+      operationId: loadAllConfigKeys
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      responses:
+        "200":
+          $ref: '#/responses/loadShortResponseWrapper'
+        "400":
+          $ref: '#/responses/RestError'
+    post:
+      description: Save new config value
+      operationId: saveConfiguration
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: Configuration body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/saveConfigurationRequest'
+      responses:
+        "201":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+    put:
+      description: Save new config value
+      operationId: updateConfiguration
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: Configuration body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/saveConfigurationRequest'
+      responses:
+        "201":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+  /api/config/{key}:
+    get:
+      description: Loads all config for given key
+      operationId: loadValues
+      parameters:
+      - in: path
+        name: key
+        required: true
+        type: string
+        x-go-name: Key
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      responses:
+        "200":
+          $ref: '#/responses/loadValuesResponseWrapper'
+        "400":
+          $ref: '#/responses/RestError'
   /api/config/{key}/{day}:
     get:
-      description: Loads all calendar items for given type and date range
+      description: Loads config value for given kay and day
       operationId: loadConfig
       parameters:
       - in: path
@@ -344,6 +473,18 @@ responses:
     schema:
       items:
         $ref: '#/definitions/loadConfigurationResponse'
+      type: array
+  loadShortResponseWrapper:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/Short'
+      type: array
+  loadValuesResponseWrapper:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/loadValueResponse'
       type: array
 schemes:
 - http

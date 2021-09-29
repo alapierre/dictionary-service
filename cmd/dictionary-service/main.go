@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"dictionaries-service/calendar"
+	"dictionaries-service/configuration"
 	"dictionaries-service/service"
 	"dictionaries-service/tenant"
 	rest "dictionaries-service/transport/http"
@@ -67,8 +68,8 @@ func main() {
 	metadataRepository := service.NewDictionaryMetadataRepository(db)
 	dictionaryService := service.NewDictionaryService(dictionaryRepository, translationRepository, metadataRepository)
 
-	configurationRepository := service.NewConfigurationRepository(db)
-	configurationService := service.NewConfigurationService(configurationRepository)
+	configurationRepository := configuration.NewRepository(db)
+	configurationService := configuration.NewConfigurationService(configurationRepository)
 
 	calendarService := calendar.NewService(calendar.NewRepository(db), calendar.NewTypeRepository(db))
 

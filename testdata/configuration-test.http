@@ -19,3 +19,68 @@ X-Tenant-ID: default
 Accept-Language: en-EN
 Cache-Control: no-cache
 Accept: application/json
+
+###
+
+GET http://localhost:9098/api/config
+X-Tenant-ID: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+
+
+###
+
+GET http://localhost:9098/api/config/smtp.server.host
+X-Tenant-ID: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+
+###
+
+POST http://localhost:9098/api/config
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2021-01-01T00:00:00.0Z",
+  "date_to": "2999-12-31T00:00:00.0Z",
+  "key": "klucz",
+  "name": "nazwa",
+  "type": "string",
+  "value": "Ala ma kota"
+}
+
+###
+
+PUT http://localhost:9098/api/config
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2021-01-01T00:00:00.0Z",
+  "date_to": "2999-12-31T00:00:00.0Z",
+  "key": "klucz",
+  "name": "nazwa",
+  "type": "string",
+  "value": "Ala ma kota 123"
+}
+
+###
+
+PUT http://localhost:9098/api/config
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2022-01-01T00:00:00.0Z",
+  "date_to": "2999-12-31T00:00:00.0Z",
+  "key": "klucz",
+  "name": "nazwa",
+  "type": "string",
+  "value": "Ala ma kota 123"
+}

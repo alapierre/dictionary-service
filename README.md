@@ -26,6 +26,7 @@ In production in several commercial projects.
 - Configuration load (store and update - soon)
 - Calendar dictionary load, store and update
 - swagger support (if you want serve swagger gui or generate open API file, you need to install goswagger: https://goswagger.io/install.html)
+- configuration entry save and update
 
 ## Required environment variables
 
@@ -305,8 +306,41 @@ result
 
 #### Store config values 
 
-not implemented yet - put your config into database
+Save new configuration entry
 
+````http request
+POST http://localhost:9098/api/config
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2021-01-01T00:00:00.0Z",
+  "date_to": "2999-12-31T00:00:00.0Z",
+  "key": "klucz",
+  "name": "nazwa",
+  "type": "string",
+  "value": "Ala ma kota"
+}
+````
+
+Update existing configuration entry
+
+````http request
+PUT http://localhost:9098/api/config
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2021-01-01T00:00:00.0Z",
+  "date_to": "2999-12-31T00:00:00.0Z",
+  "key": "klucz",
+  "name": "nazwa",
+  "type": "string",
+  "value": "Ala ma kota 123"
+}
+````
 
 ### Create dictionary entry metadata
 
