@@ -315,8 +315,8 @@ accept: application/json
 Content-Type: application/json
 
 {
-  "date_from": "2021-01-01T00:00:00.0Z",
-  "date_to": "2999-12-31T00:00:00.0Z",
+  "date_from": "2021-01-01",
+  "date_to": "2999-12-31",
   "key": "klucz",
   "name": "nazwa",
   "type": "string",
@@ -333,8 +333,8 @@ accept: application/json
 Content-Type: application/json
 
 {
-  "date_from": "2021-01-01T00:00:00.0Z",
-  "date_to": "2999-12-31T00:00:00.0Z",
+  "date_from": "2021-01-01",
+  "date_to": "2999-12-31",
   "key": "klucz",
   "name": "nazwa",
   "type": "string",
