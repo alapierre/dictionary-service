@@ -52,6 +52,11 @@ type saveConfigurationRequest struct {
 	DateTo   types.JsonDate `json:"date_to"`
 }
 
+type deleteConfigurationRequest struct {
+	Key      string         `json:"key"`
+	DateFrom types.JsonDate `json:"date_from"`
+}
+
 type loadValueResponse struct {
 	Key      string    `json:"key"`
 	Value    *string   `json:"value"`
@@ -63,6 +68,26 @@ type loadConfigurationResponse struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 	Type  string  `json:"type"`
+}
+
+func DecodeDeleteConfigurationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request deleteConfigurationRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+
+func MakeDeleteConfigurationValueEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(deleteConfigurationRequest)
+		if err := configurationService.DeleteValue(ctx, req.Key, req.DateFrom.Time()); err != nil {
+			return commons.MakeRestError(fmt.Errorf("can't delete entry for given key: %s, and date: %s", req.Key, req.DateFrom),
+				"cant_delete")
+		}
+		return nil, nil
+	}
 }
 
 func MakeUpdateConfigurationEndpoint(configurationService configuration.Service) endpoint.Endpoint {

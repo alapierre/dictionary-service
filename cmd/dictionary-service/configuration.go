@@ -10,11 +10,23 @@ import (
 
 func makeConfigurationEndpoints(r *mux.Router, configurationService configuration.Service) {
 
+	// swagger:route DELETE /api/config deleteConfigurationEntry
+	//
+	// Save new config value
+	//     Responses:
+	//       204:
+	//       400: RestError
+	r.Methods("DELETE", "OPTIONS").Path("/api/config").Handler(http.NewServer(
+		rest.MakeDeleteConfigurationValueEndpoint(configurationService),
+		rest.DecodeDeleteConfigurationRequest,
+		common.EncodeWithStatus(204),
+	))
+
 	// swagger:route PUT /api/config updateConfiguration
 	//
 	// Save new config value
 	//     Responses:
-	//       201:
+	//       204:
 	//       400: RestError
 	r.Methods("PUT", "OPTIONS").Path("/api/config").Handler(http.NewServer(
 		rest.MakeUpdateConfigurationEndpoint(configurationService),

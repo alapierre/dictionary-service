@@ -2,6 +2,19 @@ package http
 
 import "dictionaries-service/configuration"
 
+// swagger:parameters deleteConfigurationEntry
+//goland:noinspection GoUnusedType
+type deleteConfigurationEntryRequestWrapper struct {
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+
+	// Configuration body
+	// in:body
+	Body deleteConfigurationRequest
+}
+
 // swagger:parameters updateConfiguration
 //goland:noinspection GoUnusedType
 type updateConfigurationRequestWrapper struct {

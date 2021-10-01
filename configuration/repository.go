@@ -21,6 +21,7 @@ type Repository interface {
 	LoadAllShort(tenant string) ([]Short, error)
 	LoadValues(tenant, key string) ([]Configuration, error)
 	Update(configuration *Configuration) error
+	DeleteValue(tenant, key string, dateFrom time.Time) error
 }
 
 type configurationRepository struct {
@@ -79,4 +80,23 @@ func (c *configurationRepository) LoadValues(tenant, key string) ([]Configuratio
 		Select()
 
 	return result, err
+}
+
+func (c *configurationRepository) DeleteValue(tenant, key string, dateFrom time.Time) error {
+
+	res, err := c.db.Model(&Configuration{
+		Key:      key,
+		Tenant:   tenant,
+		DateFrom: dateFrom,
+	}).
+		WherePK().
+		Delete()
+
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return util.NewZeroRowsAffectedError(fmt.Errorf("there is no row for geven day: %s, key: %s and tenant: %s", dateFrom, key, tenant))
+	}
+	return nil
 }

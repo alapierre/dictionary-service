@@ -75,6 +75,17 @@ definitions:
         x-go-name: Tenant
     type: object
     x-go-package: dictionaries-service/calendar/transport/http
+  deleteConfigurationRequest:
+    properties:
+      date_from:
+        format: date
+        type: string
+        x-go-name: DateFrom
+      key:
+        type: string
+        x-go-name: Key
+    type: object
+    x-go-package: dictionaries-service/configuration/transport/http
   loadConfigurationResponse:
     properties:
       key:
@@ -233,7 +244,7 @@ paths:
           $ref: '#/responses/RestError'
   /api/calendar/{type}:
     delete:
-      description: Delete calendar type - will work only if no any calendar items
+      description: DeleteValue calendar type - will work only if no any calendar items
         for this type exist
       operationId: deleteCalendarType
       parameters:
@@ -304,7 +315,7 @@ paths:
           $ref: '#/responses/RestError'
   /api/calendar/{type}/{day}:
     delete:
-      description: Delete existing calendar item for given type and day
+      description: DeleteValue existing calendar item for given type and day
       operationId: deleteCalendar
       parameters:
       - format: date
@@ -329,6 +340,25 @@ paths:
         "400":
           $ref: '#/responses/RestError'
   /api/config:
+    delete:
+      description: Save new config value
+      operationId: deleteConfigurationEntry
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: Configuration body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/deleteConfigurationRequest'
+      responses:
+        "204":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
     get:
       description: Loads all unique config keys, name and type
       operationId: loadAllConfigKeys
@@ -377,7 +407,7 @@ paths:
         schema:
           $ref: '#/definitions/saveConfigurationRequest'
       responses:
-        "201":
+        "204":
           description: ""
         "400":
           $ref: '#/responses/RestError'

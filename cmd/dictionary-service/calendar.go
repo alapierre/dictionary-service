@@ -37,7 +37,7 @@ func makeCalendarEndpoints(r *mux.Router, service calendar.Service) {
 
 	// swagger:route DELETE /api/calendar/{type} deleteCalendarType
 	//
-	// Delete calendar type - will work only if no any calendar items for this type exist
+	// DeleteValue calendar type - will work only if no any calendar items for this type exist
 	//     Responses:
 	//       204:
 	//       400: RestError
@@ -97,7 +97,7 @@ func makeCalendarEndpoints(r *mux.Router, service calendar.Service) {
 
 	// swagger:route DELETE /api/calendar/{type}/{day} deleteCalendar
 	//
-	// Delete existing calendar item for given type and day
+	// DeleteValue existing calendar item for given type and day
 	//     Responses:
 	//       204:
 	//       400: RestError
