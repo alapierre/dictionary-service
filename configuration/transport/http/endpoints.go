@@ -52,22 +52,49 @@ type saveConfigurationRequest struct {
 	DateTo   types.JsonDate `json:"date_to"`
 }
 
+type addNewConfigurationEntryRequest struct {
+	Key      string         `json:"key"`
+	Value    *string        `json:"value"`
+	DateFrom types.JsonDate `json:"date_from"`
+	DateTo   types.JsonDate `json:"date_to"`
+}
+
 type deleteConfigurationRequest struct {
 	Key      string         `json:"key"`
 	DateFrom types.JsonDate `json:"date_from"`
 }
 
 type loadValueResponse struct {
-	Key      string    `json:"key"`
-	Value    *string   `json:"value"`
-	DateFrom time.Time `json:"date_from"`
-	DateTo   time.Time `json:"date_to"`
+	Key      string         `json:"key"`
+	Value    *string        `json:"value"`
+	DateFrom types.JsonDate `json:"date_from"`
+	DateTo   types.JsonDate `json:"date_to"`
 }
 
 type loadConfigurationResponse struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 	Type  string  `json:"type"`
+}
+
+func DecodeAddNewConfigurationEntryRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request addNewConfigurationEntryRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+
+func MakeAddNewConfigurationEntryEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(addNewConfigurationEntryRequest)
+		if err := configurationService.AddNewValueInTime(ctx, req.Key, req.Value, req.DateFrom.Time(), req.DateTo.Time()); err != nil {
+			return commons.MakeRestError(fmt.Errorf("can't create new in time entry for given key: %s, and date: %s", req.Key, req.DateFrom),
+				"cant_add_new_in_time_entry")
+		}
+		return nil, nil
+	}
 }
 
 func DecodeDeleteConfigurationRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -184,8 +211,8 @@ func MakeLoadValuesEndpoint(configurationService configuration.Service) endpoint
 			res = append(res, loadValueResponse{
 				Key:      v.Key,
 				Value:    util.SqlNullStringToStringPointer(v.Value),
-				DateFrom: v.DateFrom,
-				DateTo:   v.DateTo,
+				DateFrom: types.JsonDate(v.DateFrom),
+				DateTo:   types.JsonDate(v.DateTo),
 			})
 		}
 

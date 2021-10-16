@@ -54,6 +54,24 @@ definitions:
         x-go-name: Type
     type: object
     x-go-package: dictionaries-service/configuration
+  addNewConfigurationEntryRequest:
+    properties:
+      date_from:
+        format: date
+        type: string
+        x-go-name: DateFrom
+      date_to:
+        format: date
+        type: string
+        x-go-name: DateTo
+      key:
+        type: string
+        x-go-name: Key
+      value:
+        type: string
+        x-go-name: Value
+    type: object
+    x-go-package: dictionaries-service/configuration/transport/http
   calendarResponse:
     properties:
       day:
@@ -341,7 +359,7 @@ paths:
           $ref: '#/responses/RestError'
   /api/config:
     delete:
-      description: Save new config value
+      description: Delete config value by key and date
       operationId: deleteConfigurationEntry
       parameters:
       - description: optional tenant id
@@ -450,6 +468,26 @@ paths:
       responses:
         "200":
           $ref: '#/responses/loadConfigurationOneResponseWrapper'
+        "400":
+          $ref: '#/responses/RestError'
+  /api/config/add:
+    post:
+      description: Create new config value in time for existing key
+      operationId: addNewConfigEntry
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: Configuration body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/addNewConfigurationEntryRequest'
+      responses:
+        "201":
+          description: ""
         "400":
           $ref: '#/responses/RestError'
   /api/configs/{day}:

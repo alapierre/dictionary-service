@@ -10,9 +10,21 @@ import (
 
 func makeConfigurationEndpoints(r *mux.Router, configurationService configuration.Service) {
 
+	// swagger:route POST /api/config/value addNewConfigEntry
+	//
+	// Create new config value in time for existing key
+	//     Responses:
+	//       201:
+	//       400: RestError
+	r.Methods("POST", "OPTIONS").Path("/api/config/value").Handler(http.NewServer(
+		rest.MakeAddNewConfigurationEntryEndpoint(configurationService),
+		rest.DecodeAddNewConfigurationEntryRequest,
+		common.EncodeWithStatus(201),
+	))
+
 	// swagger:route DELETE /api/config deleteConfigurationEntry
 	//
-	// Save new config value
+	// Delete config value by key and date
 	//     Responses:
 	//       204:
 	//       400: RestError

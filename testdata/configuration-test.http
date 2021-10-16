@@ -39,6 +39,14 @@ Accept: application/json
 
 ###
 
+GET http://localhost:9098/api/config/smtp.server
+X-Tenant-ID: default
+Accept-Language: en-EN
+Cache-Control: no-cache
+Accept: application/json
+
+###
+
 POST http://localhost:9098/api/config
 X-Tenant-ID: default
 accept: application/json
@@ -83,4 +91,50 @@ Content-Type: application/json
   "name": "nazwa",
   "type": "string",
   "value": "Ala ma kota 123"
+}
+
+###
+
+POST http://localhost:9098/api/config
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2021-01-01",
+  "date_to": "2999-12-31",
+  "key": "smtp.server",
+  "name": "smtp Server Host Name",
+  "type": "string",
+  "value": "smtp.example.com"
+}
+
+###
+
+POST http://localhost:9098/api/config
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2018-01-01",
+  "date_to": "2020-12-31",
+  "key": "smtp.server",
+  "name": "smtp Server Host Name",
+  "type": "string",
+  "value": "smtp-old.example.com"
+}
+
+###
+
+POST http://localhost:9098/api/config/value
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "date_from": "2017-01-01",
+  "date_to": "2017-12-31",
+  "key": "smtp.server",
+  "value": "smtp-new.example.com"
 }

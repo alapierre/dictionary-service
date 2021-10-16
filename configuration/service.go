@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"dictionaries-service/tenant"
+	"dictionaries-service/util"
 	"fmt"
 	slog "github.com/go-eden/slf4go"
 	"time"
@@ -27,6 +28,7 @@ type Service interface {
 	LoadValues(ctx context.Context, key string) ([]Configuration, error)
 	Update(configuration *Configuration) error
 	DeleteValue(ctx context.Context, key string, dateFrom time.Time) error
+	AddNewValueInTime(ctx context.Context, key string, value *string, dateFrom, dateTo time.Time) error
 }
 
 func (c *service) LoadForDay(key, tenant string, day time.Time) (*Configuration, error) {
@@ -79,6 +81,44 @@ func (c *service) Save(conf *Configuration) error {
 
 func (c *service) Update(configuration *Configuration) error {
 	return c.repository.Update(configuration)
+}
+
+func (c *service) AddNewValueInTime(ctx context.Context, key string, value *string, dateFrom, dateTo time.Time) error {
+
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("can't read tenant from context")
+	}
+
+	origin, err := c.repository.LoadFirst(key, t.Name)
+
+	if err != nil {
+		slog.Warnf("can't read config entry for key = %s, %v", key, err)
+		return fmt.Errorf("there is no config entry for given key = %s", key)
+	}
+
+	err = c.repository.Save(&Configuration{
+		Key:      key,
+		Tenant:   t.Name,
+		Type:     origin.Type,
+		Name:     origin.Name,
+		Value:    util.PointerToSqlNullString(value),
+		DateFrom: dateFrom,
+		DateTo:   dateTo,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *service) UpdateValueInTime(key string, dateFrom time.Time, newValue string) {
+
+}
+
+func (c *service) UpdateDateTo(key string, dateFrom, newDateTo time.Time) {
+
 }
 
 func (c *service) NewConfigValue(key, tenant, configType, name, value string) error {
