@@ -54,7 +54,7 @@ definitions:
         x-go-name: Type
     type: object
     x-go-package: dictionaries-service/configuration
-  addNewConfigurationEntryRequest:
+  addNewConfigurationValueRequest:
     properties:
       date_from:
         format: date
@@ -64,9 +64,6 @@ definitions:
         format: date
         type: string
         x-go-name: DateTo
-      key:
-        type: string
-        x-go-name: Key
       value:
         type: string
         x-go-name: Value
@@ -117,22 +114,22 @@ definitions:
         x-go-name: Value
     type: object
     x-go-package: dictionaries-service/configuration/transport/http
-  loadValueResponse:
+  loadValueResponseFull:
     properties:
-      date_from:
-        format: date-time
-        type: string
-        x-go-name: DateFrom
-      date_to:
-        format: date-time
-        type: string
-        x-go-name: DateTo
       key:
         type: string
         x-go-name: Key
-      value:
+      name:
         type: string
-        x-go-name: Value
+        x-go-name: Name
+      type:
+        type: string
+        x-go-name: Type
+      values:
+        items:
+          $ref: '#/definitions/valueInTime'
+        type: array
+        x-go-name: Values
     type: object
     x-go-package: dictionaries-service/configuration/transport/http
   saveConfigurationRequest:
@@ -154,6 +151,28 @@ definitions:
       type:
         type: string
         x-go-name: Type
+      value:
+        type: string
+        x-go-name: Value
+    type: object
+    x-go-package: dictionaries-service/configuration/transport/http
+  updateValueInTimeRequest:
+    properties:
+      value:
+        type: string
+        x-go-name: Value
+    type: object
+    x-go-package: dictionaries-service/configuration/transport/http
+  valueInTime:
+    properties:
+      date_from:
+        format: date
+        type: string
+        x-go-name: DateFrom
+      date_to:
+        format: date
+        type: string
+        x-go-name: DateTo
       value:
         type: string
         x-go-name: Value
@@ -470,7 +489,7 @@ paths:
           $ref: '#/responses/loadConfigurationOneResponseWrapper'
         "400":
           $ref: '#/responses/RestError'
-  /api/config/add:
+  /api/config/{key}/value:
     post:
       description: Create new config value in time for existing key
       operationId: addNewConfigEntry
@@ -480,13 +499,50 @@ paths:
         name: X-Tenant-ID
         type: string
         x-go-name: Tenant
+      - in: path
+        name: key
+        required: true
+        type: string
+        x-go-name: Key
       - description: Configuration body
         in: body
         name: Body
         schema:
-          $ref: '#/definitions/addNewConfigurationEntryRequest'
+          $ref: '#/definitions/addNewConfigurationValueRequest'
       responses:
         "201":
+          description: ""
+        "400":
+          $ref: '#/responses/RestError'
+  /api/config/{key}/value/{from}:
+    put:
+      description: Create new config value in time for existing key
+      operationId: updateConfigValue
+      parameters:
+      - description: optional tenant id
+        in: header
+        name: X-Tenant-ID
+        type: string
+        x-go-name: Tenant
+      - description: Config entry key
+        in: path
+        name: key
+        required: true
+        type: string
+        x-go-name: Key
+      - description: date from
+        in: path
+        name: from
+        required: true
+        type: string
+        x-go-name: From
+      - description: Configuration value
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/updateValueInTimeRequest'
+      responses:
+        "200":
           description: ""
         "400":
           $ref: '#/responses/RestError'
@@ -551,9 +607,7 @@ responses:
   loadValuesResponseWrapper:
     description: ""
     schema:
-      items:
-        $ref: '#/definitions/loadValueResponse'
-      type: array
+      $ref: '#/definitions/loadValueResponseFull'
 schemes:
 - http
 swagger: "2.0"

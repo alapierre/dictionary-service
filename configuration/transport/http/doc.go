@@ -2,6 +2,26 @@ package http
 
 import "dictionaries-service/configuration"
 
+// swagger:parameters updateConfigValue
+type updateValueInTimeRequestWrapper struct {
+
+	// optional tenant id
+	// in:header
+	Tenant string `json:"X-Tenant-ID"`
+
+	// Config entry key
+	// in:path
+	Key string `json:"key"`
+
+	// date from
+	// in:path
+	From string `json:"from"`
+
+	// Configuration value
+	// in:body
+	Body updateValueInTimeRequest
+}
+
 // swagger:parameters addNewConfigEntry
 type addNewConfigurationEntryRequestWrapper struct {
 
@@ -9,9 +29,12 @@ type addNewConfigurationEntryRequestWrapper struct {
 	// in:header
 	Tenant string `json:"X-Tenant-ID"`
 
+	// in:path
+	Key string `json:"key"`
+
 	// Configuration body
 	// in:body
-	Body addNewConfigurationEntryRequest
+	Body addNewConfigurationValueRequest
 }
 
 // swagger:parameters deleteConfigurationEntry
@@ -85,7 +108,7 @@ type loadShortResponseWrapper struct {
 type loadValuesResponseWrapper struct {
 
 	// in:body
-	Body []loadValueResponse
+	Body loadValueResponseFull
 }
 
 // swagger:response loadConfigurationOneResponseWrapper

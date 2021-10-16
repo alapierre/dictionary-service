@@ -127,7 +127,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:9098/api/config/value
+POST http://localhost:9098/api/config/smtp.server/value
 X-Tenant-ID: default
 accept: application/json
 Content-Type: application/json
@@ -135,6 +135,16 @@ Content-Type: application/json
 {
   "date_from": "2017-01-01",
   "date_to": "2017-12-31",
-  "key": "smtp.server",
   "value": "smtp-new.example.com"
+}
+
+###
+
+PUT http://localhost:9098/api/config/smtp.server/value/2016-01-01
+X-Tenant-ID: default
+accept: application/json
+Content-Type: application/json
+
+{
+  "value": "something else"
 }

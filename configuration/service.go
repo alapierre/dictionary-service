@@ -29,6 +29,8 @@ type Service interface {
 	Update(configuration *Configuration) error
 	DeleteValue(ctx context.Context, key string, dateFrom time.Time) error
 	AddNewValueInTime(ctx context.Context, key string, value *string, dateFrom, dateTo time.Time) error
+	UpdateValueInTime(ctx context.Context, key string, dateFrom time.Time, newValue *string) error
+	LoadEntry(ctx context.Context, key string) (*Configuration, error)
 }
 
 func (c *service) LoadForDay(key, tenant string, day time.Time) (*Configuration, error) {
@@ -113,8 +115,38 @@ func (c *service) AddNewValueInTime(ctx context.Context, key string, value *stri
 	return nil
 }
 
-func (c *service) UpdateValueInTime(key string, dateFrom time.Time, newValue string) {
+func (c *service) LoadEntry(ctx context.Context, key string) (*Configuration, error) {
 
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("can't read tenant from context")
+	}
+
+	return c.repository.LoadFirst(key, t.Name)
+}
+
+func (c *service) UpdateValueInTime(ctx context.Context, key string, dateFrom time.Time, newValue *string) error {
+
+	t, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("can't read tenant from context")
+	}
+
+	origin, err := c.repository.LoadById(key, t.Name, dateFrom)
+
+	if err != nil {
+		slog.Warnf("can't read config entry for key = %s, and date_from = %s, %v", key, dateFrom, err)
+		return fmt.Errorf("there is no config entry for given key = %s and date_from = %s", key, dateFrom)
+	}
+
+	origin.Value = util.PointerToSqlNullString(newValue)
+
+	err = c.repository.Update(&origin)
+	if err != nil {
+		slog.Warnf("can't update config value for key = %s, and date_from = %s, %v", key, dateFrom, err)
+		return err
+	}
+	return nil
 }
 
 func (c *service) UpdateDateTo(key string, dateFrom, newDateTo time.Time) {

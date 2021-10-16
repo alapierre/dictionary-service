@@ -10,15 +10,27 @@ import (
 
 func makeConfigurationEndpoints(r *mux.Router, configurationService configuration.Service) {
 
-	// swagger:route POST /api/config/value addNewConfigEntry
+	// swagger:route PUT /api/config/{key}/value/{from} updateConfigValue
+	//
+	// Create new config value in time for existing key
+	//     Responses:
+	//       200:
+	//       400: RestError
+	r.Methods("PUT", "OPTIONS").Path("/api/config/{key}/value/{from}").Handler(http.NewServer(
+		rest.MakeUpdateValueInTimeEndpoint(configurationService),
+		rest.DecodeUpdateValueInTimeRequest,
+		common.EncodeWithStatus(200),
+	))
+
+	// swagger:route POST /api/config/{key}/value addNewConfigEntry
 	//
 	// Create new config value in time for existing key
 	//     Responses:
 	//       201:
 	//       400: RestError
-	r.Methods("POST", "OPTIONS").Path("/api/config/value").Handler(http.NewServer(
-		rest.MakeAddNewConfigurationEntryEndpoint(configurationService),
-		rest.DecodeAddNewConfigurationEntryRequest,
+	r.Methods("POST", "OPTIONS").Path("/api/config/{key}/value").Handler(http.NewServer(
+		rest.MakeAddNewConfigurationValueEndpoint(configurationService),
+		rest.DecodeAddNewConfigurationValueRequest,
 		common.EncodeWithStatus(201),
 	))
 
@@ -32,7 +44,7 @@ func makeConfigurationEndpoints(r *mux.Router, configurationService configuratio
 		rest.MakeDeleteConfigurationValueEndpoint(configurationService),
 		rest.DecodeDeleteConfigurationRequest,
 		common.EncodeWithStatus(204),
-	))
+	)) // todo: should be changed to DELETE /api/config/{key}/value/{from}
 
 	// swagger:route PUT /api/config updateConfiguration
 	//
