@@ -21,7 +21,7 @@ func (j *JsonDate) UnmarshalJSON(b []byte) error {
 }
 
 func (j JsonDate) MarshalJSON() ([]byte, error) {
-	return []byte(j.String()), nil
+	return []byte("\"" + j.String() + "\""), nil
 }
 
 // Format for printing your date
