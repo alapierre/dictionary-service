@@ -67,3 +67,8 @@ func StringToTime(str string) (time.Time, error) {
 	layout := "2006-01-02T15:04:05.000Z"
 	return time.Parse(layout, str)
 }
+
+func StringToDate(str string) (time.Time, error) {
+	layout := "2006-01-02"
+	return time.Parse(layout, str)
+}

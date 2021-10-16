@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/json"
 	"strings"
 	"time"
 )
@@ -22,7 +21,7 @@ func (j *JsonDate) UnmarshalJSON(b []byte) error {
 }
 
 func (j JsonDate) MarshalJSON() ([]byte, error) {
-	return json.Marshal(j)
+	return []byte("\"" + j.String() + "\""), nil
 }
 
 // Format for printing your date

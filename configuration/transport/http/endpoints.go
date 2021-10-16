@@ -9,6 +9,7 @@ import (
 	"dictionaries-service/util"
 	"encoding/json"
 	"fmt"
+	slog "github.com/go-eden/slf4go"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -52,22 +53,112 @@ type saveConfigurationRequest struct {
 	DateTo   types.JsonDate `json:"date_to"`
 }
 
+type addNewConfigurationValueRequest struct {
+	Value    *string        `json:"value"`
+	DateFrom types.JsonDate `json:"date_from"`
+	DateTo   types.JsonDate `json:"date_to"`
+}
+
+type addNewConfigurationValueCompleted struct {
+	Key string `json:"key"`
+	addNewConfigurationValueRequest
+}
+
 type deleteConfigurationRequest struct {
 	Key      string         `json:"key"`
 	DateFrom types.JsonDate `json:"date_from"`
 }
 
-type loadValueResponse struct {
-	Key      string    `json:"key"`
-	Value    *string   `json:"value"`
-	DateFrom time.Time `json:"date_from"`
-	DateTo   time.Time `json:"date_to"`
+type loadValueResponseFull struct {
+	Key    string        `json:"key"`
+	Type   string        `json:"type"`
+	Name   string        `json:"name"`
+	Values []valueInTime `json:"values"`
+}
+
+type valueInTime struct {
+	Value    *string        `json:"value"`
+	DateFrom types.JsonDate `json:"date_from"`
+	DateTo   types.JsonDate `json:"date_to"`
 }
 
 type loadConfigurationResponse struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 	Type  string  `json:"type"`
+}
+
+type updateValueInTimeRequest struct {
+	Value *string `json:"value"`
+}
+
+type updateValueInTimeCompleted struct {
+	key  string
+	from time.Time
+	updateValueInTimeRequest
+}
+
+func DecodeUpdateValueInTimeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	var request updateValueInTimeRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	vars := mux.Vars(r)
+	key := vars["key"]
+	from, err := util.StringToDate(vars["from"])
+
+	if err != nil {
+		slog.Errorf("can't convert %s into date", vars["from"])
+		return nil, err
+	}
+
+	return updateValueInTimeCompleted{
+		key:                      key,
+		from:                     from,
+		updateValueInTimeRequest: request,
+	}, nil
+}
+
+func MakeUpdateValueInTimeEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(updateValueInTimeCompleted)
+		err := configurationService.UpdateValueInTime(ctx, req.key, req.from, req.Value)
+		if err != nil {
+			return commons.MakeRestError(fmt.Errorf("can't update in time value for given key: %s, and date: %s, %v", req.key, req.from, err),
+				"cant_add_new_in_time_entry")
+		}
+		return nil, nil
+	}
+}
+
+func DecodeAddNewConfigurationValueRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request addNewConfigurationValueRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	vars := mux.Vars(r)
+	key := vars["key"]
+
+	return addNewConfigurationValueCompleted{
+		Key:                             key,
+		addNewConfigurationValueRequest: request,
+	}, nil
+}
+
+func MakeAddNewConfigurationValueEndpoint(configurationService configuration.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(addNewConfigurationValueCompleted)
+		if err := configurationService.AddNewValueInTime(ctx, req.Key, req.Value, req.DateFrom.Time(), req.DateTo.Time()); err != nil {
+			return commons.MakeRestError(fmt.Errorf("can't create new in time value for given key: %s, and date: %s, %v", req.Key, req.DateFrom, err),
+				"cant_add_new_in_time_value")
+		}
+		return nil, nil
+	}
 }
 
 func DecodeDeleteConfigurationRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -173,23 +264,32 @@ func MakeLoadValuesEndpoint(configurationService configuration.Service) endpoint
 
 		req := request.(valuesRequest)
 
+		entry, err := configurationService.LoadEntry(ctx, req.Key)
+		if err != nil {
+			return commons.MakeRestError(err, "cant_delete_dictionary_entry")
+		}
+
 		values, err := configurationService.LoadValues(ctx, req.Key)
 		if err != nil {
 			return commons.MakeRestError(err, "cant_delete_dictionary_entry")
 		}
 
-		var res []loadValueResponse
+		var res []valueInTime
 
 		for _, v := range values {
-			res = append(res, loadValueResponse{
-				Key:      v.Key,
+			res = append(res, valueInTime{
 				Value:    util.SqlNullStringToStringPointer(v.Value),
-				DateFrom: v.DateFrom,
-				DateTo:   v.DateTo,
+				DateFrom: types.JsonDate(v.DateFrom),
+				DateTo:   types.JsonDate(v.DateTo),
 			})
 		}
 
-		return res, nil
+		return &loadValueResponseFull{
+			Key:    entry.Key,
+			Type:   entry.Type,
+			Name:   entry.Name,
+			Values: res,
+		}, nil
 	}
 }
 

@@ -84,7 +84,7 @@ func MakeRestError(err error, message string) (interface{}, error) {
 	return &RestError{
 		Error:            message,
 		ErrorDescription: err.Error(),
-	}, nil
+	}, err
 }
 
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {

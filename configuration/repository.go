@@ -22,6 +22,8 @@ type Repository interface {
 	LoadValues(tenant, key string) ([]Configuration, error)
 	Update(configuration *Configuration) error
 	DeleteValue(tenant, key string, dateFrom time.Time) error
+	LoadFirst(key, tenant string) (*Configuration, error)
+	LoadById(key, tenant string, from time.Time) (Configuration, error)
 }
 
 type configurationRepository struct {
@@ -36,6 +38,30 @@ func (c *configurationRepository) LoadForDay(key, tenant string, day time.Time) 
 		Select()
 
 	return config, err
+}
+
+func (c *configurationRepository) LoadFirst(key, tenant string) (*Configuration, error) {
+
+	config := &Configuration{}
+	_, err := c.db.Query(config, `select * from dictionary.configuration where key = ? and tenant = ? order by date_from limit 1`, key, tenant)
+
+	return config, err
+
+}
+
+func (c *configurationRepository) LoadById(key, tenant string, from time.Time) (Configuration, error) {
+
+	var result = Configuration{
+		Key:      key,
+		Tenant:   tenant,
+		DateFrom: from,
+	}
+
+	err := c.db.Model(&result).
+		WherePK().
+		Select()
+
+	return result, err
 }
 
 func (c *configurationRepository) Load(key, tenant string, from, to time.Time) ([]Configuration, error) {
