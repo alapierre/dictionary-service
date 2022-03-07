@@ -69,6 +69,8 @@ github.com/go-eden/routine v0.0.1/go.mod h1:R+sklWRKa0GPYXW5Opyr1nSb9KbwpEF9AXBA
 github.com/go-eden/slf4go v1.0.7/go.mod h1:9pQ/e6/doWqmkddbdHij0oA3BXs8jdC6thSK+RQdv6I=
 github.com/go-eden/slf4go v1.1.0 h1:35zmZxjJYaj6C8J9TwNEvaoBdEgKSCdQSLrruRdbywM=
 github.com/go-eden/slf4go v1.1.0/go.mod h1:mnVsjQFGLXKKWN6Mb9GREeZ2DOwwmLrb4PsLfTAdkTM=
+github.com/go-eden/slf4go v1.1.2 h1:WVl2nVp7GvqvhHGzAXC0u1LTQvn5OgFcfuwmeMok4d8=
+github.com/go-eden/slf4go v1.1.2/go.mod h1:mnVsjQFGLXKKWN6Mb9GREeZ2DOwwmLrb4PsLfTAdkTM=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.10.0 h1:dXFJfIHVvUcpSgDOV+Ne6t7jXri8Tfv2uOLHUZ2XNuo=
