@@ -1,6 +1,6 @@
 module dictionaries-service
 
-go 1.17
+go 1.19
 
 require (
 	github.com/alapierre/gokit-utils v0.0.2
