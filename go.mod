@@ -1,6 +1,6 @@
 module dictionaries-service
 
-go 1.17
+go 1.25.0
 
 require (
 	github.com/alapierre/gokit-utils v0.0.2
@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.36.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
